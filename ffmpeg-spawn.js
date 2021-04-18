@@ -17,8 +17,6 @@ module.exports = RED => {
     constructor(config) {
       createNode(this, config);
 
-      // console.log(config);
-
       try {
         this.ffmpeg = undefined;
 
@@ -133,7 +131,7 @@ module.exports = RED => {
 
       this.removeListener('close', this.onClose);
 
-      await this.stop();
+      await this.stop('SIGKILL');
 
       const message = removed ? _('ffmpeg-spawn.info.removed') : _('ffmpeg-spawn.info.closed');
 
@@ -225,7 +223,7 @@ module.exports = RED => {
             const killSignal = ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(signal) ? signal : this.killSignal;
 
             if (this.ffmpeg.kill(0)) {
-              this.ffmpeg.stdin.end();
+              this.ffmpeg.stdin.end('q');
 
               this.ffmpeg.kill(killSignal);
             }
