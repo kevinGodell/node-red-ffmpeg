@@ -1,0 +1,43 @@
+{
+  "name": "node-red-contrib-ffmpeg-spawn",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "pack": "npm pack",
+    "pretty": "prettier --write *.html",
+    "lint": "eslint --fix --ext .js --ignore-path .gitignore .",
+    "clean": "npm run lint && npm run pretty"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kevinGodell/node-red-contrib-ffmpeg-spawn.git"
+  },
+  "keywords": [],
+  "author": "Kevin Godell <kevin.godell@gmail.com> (https://github.com/kevinGodell)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kevinGodell/node-red-contrib-ffmpeg-spawn/issues"
+  },
+  "homepage": "https://github.com/kevinGodell/node-red-contrib-ffmpeg-spawn#readme",
+  "devDependencies": {
+    "eslint": "^7.23.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "prettier": "^2.2.1"
+  },
+  "files": [
+    "ffmpeg-spawn.js",
+    "ffmpeg-spawn.html",
+    "lib/ffmpeg.js",
+    "lib/jsonParse.js",
+    "locales/en-US/ffmpeg-spawn.json"
+  ],
+  "dependencies": {},
+  "node-red": {
+    "nodes": {
+      "ffmpeg-spawn": "ffmpeg-spawn.js"
+    }
+  }
+}

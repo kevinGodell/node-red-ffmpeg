@@ -1,0 +1,160 @@
+<script type="text/javascript">
+  // register node
+  RED.nodes.registerType('ffmpeg-spawn', {
+    align: 'left',
+    category: 'cctv',
+    color: '#DEBD5C',
+    defaults: {
+      name: {
+        value: '',
+      },
+      outputs: {
+        value: 1,
+      },
+      migrate: {
+        // migration versioning
+        // flag for adding new defaults
+        value: 0.000000001,
+      },
+      cmdPath: {
+        value: '',
+        validate: function (cmdPath) {
+          return cmdPath === '' || /^\s*$|ffmpeg/i.test(cmdPath);
+        },
+      },
+      cmdArgs: {
+        value: JSON.stringify([]),
+        validate: function (cmdArgs) {
+          try {
+            return Array.isArray(JSON.parse(cmdArgs));
+          } catch (e) {
+            return false;
+          }
+        },
+      },
+      cmdOutputs: {
+        value: 0,
+        validate: function (cmdOutputs) {
+          return cmdOutputs >= 0 && cmdOutputs <= 5;
+        },
+      },
+      killSignal: {
+        value: 'SIGTERM',
+        validate: function (killSignal) {
+          return ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(killSignal);
+        },
+      },
+    },
+    paletteLabel: 'ffmpeg',
+    icon: 'font-awesome/fa-file-video-o',
+    inputs: 1,
+    outputs: 1,
+    label: function () {
+      return this.name || this.type;
+    },
+    inputLabels: function () {
+      return 'stdin';
+    },
+    outputLabels: function (index) {
+      switch (index) {
+        case 0:
+          return 'status';
+        case 1:
+          return 'stdout';
+        case 2:
+          return 'stderr';
+        default:
+          return `stdio[${index}]`;
+      }
+    },
+    oneditprepare: function () {
+      $('#node-input-cmdPath')
+        .prop('placeholder', 'ffmpeg')
+        .on('change', function () {
+          this.value = this.value.trim();
+        });
+
+      $('#node-input-cmdArgs').typedInput({ types: ['json'] });
+
+      const cmdOutputsMin = 0;
+      const cmdOutputsMax = 5;
+      $('#node-input-cmdOutputs').spinner({
+        min: cmdOutputsMin,
+        max: cmdOutputsMax,
+        step: 1,
+        change: function (event, ui) {
+          let value = parseInt(this.value);
+          if (Number.isNaN(value) || value < cmdOutputsMin) {
+            value = cmdOutputsMin;
+          } else if (value > cmdOutputsMax) {
+            value = cmdOutputsMax;
+          }
+          this.value = value;
+        },
+      });
+
+      $('#node-input-killSignal').typedInput({
+        types: [
+          {
+            value: 'str',
+            icon: 'fa fa-times',
+            options: ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'],
+          },
+        ],
+      });
+
+      // migration code start
+      if (typeof this.migrate === 'undefined' || this.migrate < this._def.defaults.migrate.value) {
+        this.migrate = this._def.defaults.migrate.value;
+      }
+      // migration code end
+
+      $('<button type="button" class="red-ui-button red-ui-button-small"><i class="fa fa-book"></i> help</button>')
+        .on('click', () => {
+          RED.sidebar.help.show(this.type);
+        })
+        .appendTo($('div.red-ui-tray-footer'));
+    },
+    oneditsave: function () {
+      this.cmdOutputs = $('#node-input-cmdOutputs').spinner('value');
+      this.outputs = this.cmdOutputs + 1;
+    },
+    onpaletteadd: function () {
+      console.log('paletteadd', this);
+    },
+  });
+</script>
+
+<script data-template-name="ffmpeg-spawn" type="text/html">
+  <div class="form-row">
+    <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+    <input type="text" id="node-input-name" placeholder="Name" />
+  </div>
+
+  <fieldset>
+    <legend>spawn options</legend>
+    <p class="form-tips">something important...</p>
+
+    <div class="form-row">
+      <label for="node-input-cmdPath"><i class="fa fa-terminal"></i> Path</label>
+      <input type="text" id="node-input-cmdPath" />
+    </div>
+
+    <div class="form-row">
+      <label for="node-input-cmdArgs"><i class="fa fa-gears"></i> Args</label>
+      <input id="node-input-cmdArgs" />
+    </div>
+
+    <div class="form-row">
+      <label for="node-input-cmdOutputs"><i class="fa fa-random"></i> Outputs</label>
+      <input id="node-input-cmdOutputs" />
+    </div>
+
+    <div class="form-row">
+      <label for="node-input-killSignal"><i class="fa fa-times"></i> Signal</label>
+      <input id="node-input-killSignal" />
+    </div>
+  </fieldset>
+</script>
+
+<script data-help-name="ffmpeg-spawn" type="text/html"></script>

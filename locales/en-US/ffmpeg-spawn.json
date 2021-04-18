@@ -1,0 +1,19 @@
+{
+  "ffmpeg-spawn": {
+    "label": {},
+    "info": {
+      "ready": "ready",
+      "removed": "removed",
+      "closed": "closed"
+    },
+    "success": {},
+    "warning": {
+      "unknown_payload": "unknown payload \"__payload__\""
+    },
+    "error": {
+      "cmd_path_invalid": "cmdPath \"__cmdPath__\" is invalid",
+      "cmd_args_invalid": "cmdArgs \"__cmdArgs__\" is invalid",
+      "cmd_outputs_invalid": "cmdOutputs \"__cmdOutputs__\" is invalid"
+    }
+  }
+}
