@@ -184,11 +184,7 @@ module.exports = RED => {
           });
 
           this.ffmpeg.stdin.on('error', err => {
-            console.warn(err.toString());
-
-            this.warn(err.toString());
-
-            this.status({ fill: 'red', shape: 'dot', text: err.toString() });
+            console.log(`${this.id}: ${err.toString()}`);
           });
 
           if (Buffer.isBuffer(payload)) {
@@ -222,8 +218,8 @@ module.exports = RED => {
 
             const killSignal = ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(signal) ? signal : this.killSignal;
 
-            if (this.ffmpeg.kill(0)) {
-              this.ffmpeg.stdin.end('q');
+            if (this.ffmpeg.kill(0) && !this.ffmpeg.stdin.destroyed) {
+              this.ffmpeg.stdin.destroy();
 
               this.ffmpeg.kill(killSignal);
             }
