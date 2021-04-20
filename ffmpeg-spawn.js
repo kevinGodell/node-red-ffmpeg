@@ -28,8 +28,6 @@ module.exports = RED => {
 
         this.cmdArgs = jsonParse(config.cmdArgs);
 
-        this.cmdInputs = parseInt(config.cmdInputs);
-
         this.cmdOutputs = parseInt(config.cmdOutputs);
 
         this.killSignal = ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(config.killSignal) ? config.killSignal : 'SIGTERM';
@@ -98,11 +96,11 @@ module.exports = RED => {
       }
 
       if (typeof action === 'object') {
-        const { command, signal } = action;
+        const { command, signal, args } = action;
 
         switch (command) {
           case 'start':
-            this.start(payload);
+            this.start(payload, args);
 
             break;
 
@@ -114,7 +112,7 @@ module.exports = RED => {
           case 'restart':
             await this.stop(signal);
 
-            this.start(payload);
+            this.start(payload, args);
 
             break;
 
@@ -140,9 +138,11 @@ module.exports = RED => {
       done();
     }
 
-    start(payload) {
+    start(payload, args) {
       if (!this.running) {
-        this.ffmpeg = spawn(this.cmdPath, this.cmdArgs, { stdio: this.stdio });
+        const cmdArgs = Array.isArray(args) ? args : this.cmdArgs;
+
+        this.ffmpeg = spawn(this.cmdPath, cmdArgs, { stdio: this.stdio });
 
         this.ffmpeg.on('error', err => {
           this.error(err);
@@ -247,8 +247,3 @@ module.exports = RED => {
 
   registerType(FfmpegSpawnNode.type, FfmpegSpawnNode, FfmpegSpawnNode.settings);
 };
-
-/*
-todo
-- on input, allow override of cmdArgs
- */
