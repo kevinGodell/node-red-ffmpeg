@@ -1,6 +1,6 @@
 'use strict';
 
-const cmdPath = require('./lib/ffmpeg');
+const ffmpeg = require('./lib/ffmpeg');
 
 const jsonParse = require('./lib/jsonParse');
 
@@ -24,9 +24,9 @@ module.exports = RED => {
 
         this.stdio = undefined;
 
-        this.cmdPath = (config.cmdPath || cmdPath).trim();
+        this.cmdPath = config.cmdPath.trim() || ffmpeg.cmdPath;
 
-        this.cmdArgs = jsonParse(config.cmdArgs);
+        this.cmdArgs = config.cmdArgs ? jsonParse(config.cmdArgs) : ffmpeg.cmdArgs;
 
         this.cmdOutputs = parseInt(config.cmdOutputs);
 
