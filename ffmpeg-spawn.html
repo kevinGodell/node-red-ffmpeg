@@ -23,7 +23,7 @@
         },
       },
       cmdArgs: {
-        value: JSON.stringify([]),
+        value: JSON.stringify(['-version']),
         validate: function (cmdArgs) {
           try {
             return Array.isArray(JSON.parse(cmdArgs));
@@ -64,7 +64,7 @@
         case 2:
           return 'stderr';
         default:
-          return `stdio[${index}]`;
+          return `stdio${index}`;
       }
     },
     oneditprepare: function () {
@@ -74,7 +74,14 @@
           this.value = this.value.trim();
         });
 
-      $('#node-input-cmdArgs').typedInput({ types: ['json'] });
+      $('#node-input-cmdArgs')
+        .typedInput({ types: ['json'] })
+        .on('change', function (event, type, value) {
+          const val = $(this).typedInput('value').trim();
+          if (val === '') {
+            $(this).typedInput('value', '[]');
+          }
+        });
 
       const cmdOutputsMin = 0;
       const cmdOutputsMax = 5;
