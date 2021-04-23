@@ -157,9 +157,13 @@ module.exports = RED => {
 
           const message = `pid: ${pid}`;
 
+          const topic = this.getTopic(0);
+
+          const status = 'spawn';
+
           this.status({ fill: 'green', shape: 'dot', text: message });
 
-          this.send({ payload: { status: 'spawn', pid } });
+          this.send({ topic, payload: { status, pid } });
 
           this.ffmpeg.once('close', (code, signal) => {
             this.ffmpeg.stdin.removeAllListeners('error');
@@ -174,9 +178,13 @@ module.exports = RED => {
 
             const message = `code: ${code}, signal: ${signal}, killed: ${killed}`;
 
+            const topic = 'status';
+
+            const status = 'close';
+
             this.status({ fill: 'red', shape: 'dot', text: message });
 
-            this.send({ payload: { status: 'close', pid, code, signal, killed } });
+            this.send({ topic, payload: { status, pid, code, signal, killed } });
 
             this.ffmpeg = undefined;
 
@@ -193,13 +201,19 @@ module.exports = RED => {
 
           for (let i = 1; i < this.stdio.length; ++i) {
             if (this.stdio[i] === 'pipe') {
-              this.ffmpeg.stdio[i].on('data', data => {
-                const wires = [];
+              const wires = [];
 
-                wires[i] = { payload: data };
+              const index = i;
+
+              const topic = this.getTopic(index);
+
+              const stdioOnData = data => {
+                wires[index] = { topic, payload: data };
 
                 this.send(wires);
-              });
+              };
+
+              this.ffmpeg.stdio[i].on('data', stdioOnData);
             }
           }
         }
@@ -228,6 +242,22 @@ module.exports = RED => {
       }
 
       return Promise.resolve();
+    }
+
+    getTopic(index) {
+      switch (index) {
+        case 0:
+          return 'status';
+
+        case 1:
+          return 'stdout';
+
+        case 2:
+          return 'stderr';
+
+        default:
+          return `stdio${index}`;
+      }
     }
   }
 
