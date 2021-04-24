@@ -30,6 +30,8 @@ module.exports = RED => {
 
         this.cmdOutputs = parseInt(config.cmdOutputs);
 
+        this.splitOutput = config.msgOutput !== 'combined';
+
         this.killSignal = ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(config.killSignal) ? config.killSignal : 'SIGTERM';
 
         this.validateCmd();
@@ -201,19 +203,21 @@ module.exports = RED => {
 
           for (let i = 1; i < this.stdio.length; ++i) {
             if (this.stdio[i] === 'pipe') {
-              const wires = [];
+              const topic = this.getTopic(i);
 
-              const index = i;
+              if (this.splitOutput) {
+                const wires = [];
 
-              const topic = this.getTopic(index);
+                this.ffmpeg.stdio[i].on('data', data => {
+                  wires[i] = { topic, payload: data };
 
-              const stdioOnData = data => {
-                wires[index] = { topic, payload: data };
-
-                this.send(wires);
-              };
-
-              this.ffmpeg.stdio[i].on('data', stdioOnData);
+                  this.send(wires);
+                });
+              } else {
+                this.ffmpeg.stdio[i].on('data', data => {
+                  this.send({ topic, payload: data });
+                });
+              }
             }
           }
         }

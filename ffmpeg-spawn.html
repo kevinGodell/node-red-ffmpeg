@@ -14,7 +14,7 @@
       migrate: {
         // migration versioning
         // flag for adding new defaults
-        value: 0.000000001,
+        value: 0.000000002,
       },
       cmdPath: {
         value: '',
@@ -44,6 +44,12 @@
           return ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(killSignal);
         },
       },
+      msgOutput: {
+        value: 'split',
+        validate: function (msgOutput) {
+          return ['split', 'combined'].includes(msgOutput);
+        },
+      },
     },
     paletteLabel: 'ffmpeg',
     icon: 'font-awesome/fa-file-video-o',
@@ -56,6 +62,9 @@
       return 'stdin';
     },
     outputLabels: function (index) {
+      if (this.msgOutput === 'combined') {
+        return 'output';
+      }
       switch (index) {
         case 0:
           return 'status';
@@ -68,13 +77,13 @@
       }
     },
     oneditprepare: function () {
-      $('#node-input-cmdPath')
+      const cmdPath = $('#node-input-cmdPath')
         .prop('placeholder', 'ffmpeg')
         .on('change', function () {
           this.value = this.value.trim();
         });
 
-      $('#node-input-cmdArgs')
+      const cmdArgs = $('#node-input-cmdArgs')
         .typedInput({ types: ['json'] })
         .on('change', function (event, type, value) {
           const val = $(this).typedInput('value').trim();
@@ -85,7 +94,7 @@
 
       const cmdOutputsMin = 0;
       const cmdOutputsMax = 5;
-      $('#node-input-cmdOutputs').spinner({
+      const cmdOutputs = $('#node-input-cmdOutputs').spinner({
         min: cmdOutputsMin,
         max: cmdOutputsMax,
         step: 1,
@@ -100,7 +109,7 @@
         },
       });
 
-      $('#node-input-killSignal').typedInput({
+      const killSignal = $('#node-input-killSignal').typedInput({
         types: [
           {
             value: 'str',
@@ -110,9 +119,21 @@
         ],
       });
 
+      const msgOutput = $('#node-input-msgOutput').typedInput({
+        types: [
+          {
+            value: 'str',
+            icon: ['fa fa-envelope'],
+            options: ['split', 'combined'],
+          },
+        ],
+      });
+
       // migration code start
       if (typeof this.migrate === 'undefined' || this.migrate < this._def.defaults.migrate.value) {
         this.migrate = this._def.defaults.migrate.value;
+        this.msgOutput = this._def.defaults.msgOutput.value;
+        msgOutput.typedInput('value', this.msgOutput);
       }
       // migration code end
 
@@ -124,7 +145,8 @@
     },
     oneditsave: function () {
       this.cmdOutputs = $('#node-input-cmdOutputs').spinner('value');
-      this.outputs = this.cmdOutputs + 1;
+      this.msgOutput = $('#node-input-msgOutput').typedInput('value');
+      this.outputs = this.msgOutput === 'combined' ? 1 : this.cmdOutputs + 1;
     },
     onpaletteadd: function () {
       console.log('paletteadd', this);
@@ -140,7 +162,6 @@
 
   <fieldset>
     <legend>spawn options</legend>
-    <p class="form-tips">something important...</p>
 
     <div class="form-row">
       <label for="node-input-cmdPath"><i class="fa fa-terminal"></i> Path</label>
@@ -156,10 +177,23 @@
       <label for="node-input-cmdOutputs"><i class="fa fa-random"></i> Outputs</label>
       <input id="node-input-cmdOutputs" />
     </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>close options</legend>
 
     <div class="form-row">
       <label for="node-input-killSignal"><i class="fa fa-times"></i> Signal</label>
       <input id="node-input-killSignal" />
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>message options</legend>
+
+    <div class="form-row">
+      <label for="node-input-msgOutput"><i class="fa fa-envelope"></i> Output</label>
+      <input id="node-input-msgOutput" />
     </div>
   </fieldset>
 </script>
