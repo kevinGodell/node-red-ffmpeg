@@ -1,7 +1,5 @@
 'use strict';
 
-const ffmpeg = require('./lib/ffmpeg');
-
 const jsonParse = require('./lib/jsonParse');
 
 const { spawn, ChildProcess } = require('child_process');
@@ -12,6 +10,10 @@ module.exports = RED => {
     _,
     nodes: { createNode, registerType },
   } = RED;
+
+  const { ffmpegSpawn = {} } = settings;
+
+  const { cmdPath = 'ffmpeg' } = ffmpegSpawn;
 
   class FfmpegSpawnNode {
     constructor(config) {
@@ -24,9 +26,9 @@ module.exports = RED => {
 
         this.stdio = undefined;
 
-        this.cmdPath = config.cmdPath.trim() || ffmpeg.cmdPath;
+        this.cmdPath = config.cmdPath.trim() || cmdPath;
 
-        this.cmdArgs = config.cmdArgs ? jsonParse(config.cmdArgs) : ffmpeg.cmdArgs;
+        this.cmdArgs = config.cmdArgs ? jsonParse(config.cmdArgs) : ['-version'];
 
         this.cmdOutputs = parseInt(config.cmdOutputs);
 
@@ -271,8 +273,7 @@ module.exports = RED => {
     settings: {
       ffmpegSpawn: {
         value: {
-          // timeLimit: FfmpegSpawnNode.timeLimit,
-          // sizeLimit: FfmpegSpawnNode.sizeLimit,
+          cmdPath,
         },
         exportable: true,
       },

@@ -17,7 +17,7 @@
         value: 0.000000002,
       },
       cmdPath: {
-        value: '',
+        value: RED.settings.ffmpegSpawn.cmdPath,
         validate: function (cmdPath) {
           return cmdPath === '' || /^\s*$|ffmpeg/i.test(cmdPath);
         },
@@ -77,10 +77,13 @@
       }
     },
     oneditprepare: function () {
+      const cmdPathPlaceholder = RED.settings.ffmpegSpawn.cmdPath;
       const cmdPath = $('#node-input-cmdPath')
-        .prop('placeholder', 'ffmpeg')
-        .on('change', function () {
+        .prop('placeholder', cmdPathPlaceholder)
+        .prop('title', this.cmdPath || cmdPathPlaceholder)
+        .on('input', function () {
           this.value = this.value.trim();
+          this.title = this.value || cmdPathPlaceholder;
         });
 
       const cmdArgs = $('#node-input-cmdArgs')
