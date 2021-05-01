@@ -24,8 +24,6 @@ module.exports = RED => {
 
         this.running = false;
 
-        this.stdio = undefined;
-
         this.cmdPath = config.cmdPath.trim() || cmdPath;
 
         this.cmdArgs = config.cmdArgs ? jsonParse(config.cmdArgs) : ['-version'];
@@ -36,9 +34,11 @@ module.exports = RED => {
 
         this.killSignal = ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(config.killSignal) ? config.killSignal : 'SIGTERM';
 
-        this.validateCmd();
+        FfmpegSpawnNode.validateCmdPath(this.cmdPath); // throws
 
-        this.createStdio();
+        FfmpegSpawnNode.validateCmdArgs(this.cmdArgs); // throws
+
+        FfmpegSpawnNode.validateCmdOutputs(this.cmdOutputs); // throws
 
         this.on('input', this.onInput);
 
@@ -52,41 +52,47 @@ module.exports = RED => {
       }
     }
 
-    validateCmd() {
-      if (!/ffmpeg/i.test(this.cmdPath)) {
-        throw new Error(_('ffmpeg-spawn.error.cmd_path_invalid', { cmdPath: this.cmdPath }));
-      }
-
-      if (!Array.isArray(this.cmdArgs)) {
-        throw new Error(_('ffmpeg-spawn.error.cmd_args_invalid', { cmdArgs: this.cmdArgs }));
-      }
-
-      if (Number.isNaN(this.cmdOutputs) || this.cmdOutputs < 0 || this.cmdOutputs > 5) {
-        throw new Error(_('ffmpeg-spawn.error.cmd_outputs_invalid', { cmdOutputs: this.cmdOutputs }));
+    static validateCmdPath(cmdPath) {
+      if (!/ffmpeg/i.test(cmdPath)) {
+        throw new Error(_('ffmpeg-spawn.error.cmd_path_invalid', { cmdPath }));
       }
     }
 
-    createStdio() {
-      this.stdio = ['pipe'];
+    static validateCmdArgs(cmdArgs) {
+      if (!Array.isArray(cmdArgs)) {
+        throw new Error(_('ffmpeg-spawn.error.cmd_args_invalid', { cmdArgs }));
+      }
+    }
 
-      switch (this.cmdOutputs) {
+    static validateCmdOutputs(cmdOutputs) {
+      if (!Number.isInteger(cmdOutputs) || cmdOutputs < 0 || cmdOutputs > 5) {
+        throw new Error(_('ffmpeg-spawn.error.cmd_outputs_invalid', { cmdOutputs }));
+      }
+    }
+
+    static createStdio(cmdOutputs) {
+      const stdio = ['pipe'];
+
+      switch (cmdOutputs) {
         case 0:
-          this.stdio.push(...['ignore', 'ignore']);
+          stdio.push(...['ignore', 'ignore']);
 
           break;
 
         case 1:
-          this.stdio.push(...['pipe', 'ignore']);
+          stdio.push(...['pipe', 'ignore']);
 
           break;
 
         default:
-          for (let i = 0; i < this.cmdOutputs; ++i) {
-            this.stdio.push('pipe');
+          for (let i = 0; i < cmdOutputs; ++i) {
+            stdio.push('pipe');
           }
 
           break;
       }
+
+      return stdio;
     }
 
     async onInput(msg) {
@@ -144,93 +150,118 @@ module.exports = RED => {
 
     start(payload, path, args, outputs, topics) {
       if (!this.running) {
-        const cmdPath = /ffmpeg/i.test(path) ? path : this.cmdPath;
+        try {
+          let cmdPath;
 
-        const cmdArgs = Array.isArray(args) ? args : this.cmdArgs;
+          if (typeof path !== 'undefined') {
+            FfmpegSpawnNode.validateCmdPath(path); // throws
 
-        if (!this.splitOutput) {
-          // allow for dynamic topics and outputs
-          // will rebuild this.stdio
-        }
+            cmdPath = path;
+          } else {
+            cmdPath = this.cmdPath;
+          }
 
-        const stdio = this.stdio;
+          let cmdArgs;
 
-        this.ffmpeg = spawn(cmdPath, cmdArgs, { stdio });
+          if (typeof args !== 'undefined') {
+            FfmpegSpawnNode.validateCmdArgs(args); // throws
 
-        this.ffmpeg.on('error', err => {
+            cmdArgs = args;
+          } else {
+            cmdArgs = this.cmdArgs;
+          }
+
+          let stdio;
+
+          if (!this.splitOutput && typeof outputs !== 'undefined') {
+            FfmpegSpawnNode.validateCmdOutputs(outputs); // throws
+
+            stdio = FfmpegSpawnNode.createStdio(outputs);
+          } else {
+            stdio = FfmpegSpawnNode.createStdio(this.cmdOutputs);
+          }
+
+          this.ffmpeg = spawn(cmdPath, cmdArgs, { stdio });
+
+          this.ffmpeg.on('error', err => {
+            this.error(err);
+
+            this.status({ fill: 'red', shape: 'dot', text: err.toString() });
+          });
+
+          const { pid } = this.ffmpeg;
+
+          if (pid) {
+            this.running = true;
+
+            const message = `pid: ${pid}`;
+
+            const topic = this.getTopic(0);
+
+            const status = 'spawn';
+
+            this.status({ fill: 'green', shape: 'dot', text: message });
+
+            this.send({ topic, payload: { status, pid } });
+
+            this.ffmpeg.once('close', (code, signal) => {
+              this.ffmpeg.stdin.removeAllListeners('error');
+
+              for (let i = 1; i < stdio.length; ++i) {
+                if (stdio[i] === 'pipe') {
+                  this.ffmpeg.stdio[i].removeAllListeners('data');
+                }
+              }
+
+              const { pid, killed } = this.ffmpeg;
+
+              const message = `code: ${code}, signal: ${signal}, killed: ${killed}`;
+
+              const topic = 'status';
+
+              const status = 'close';
+
+              this.status({ fill: 'red', shape: 'dot', text: message });
+
+              this.send({ topic, payload: { status, pid, code, signal, killed } });
+
+              this.ffmpeg = undefined;
+
+              this.running = false;
+            });
+
+            this.ffmpeg.stdin.on('error', err => {
+              console.log(`${this.id}: ${err.toString()}`);
+            });
+
+            if (Buffer.isBuffer(payload)) {
+              this.ffmpeg.stdin.write(payload);
+            }
+
+            for (let i = 1; i < stdio.length; ++i) {
+              if (stdio[i] === 'pipe') {
+                const topic = this.getTopic(i);
+
+                if (this.splitOutput) {
+                  const wires = [];
+
+                  this.ffmpeg.stdio[i].on('data', data => {
+                    wires[i] = { topic, payload: data };
+
+                    this.send(wires);
+                  });
+                } else {
+                  this.ffmpeg.stdio[i].on('data', data => {
+                    this.send({ topic, payload: data });
+                  });
+                }
+              }
+            }
+          }
+        } catch (err) {
           this.error(err);
 
           this.status({ fill: 'red', shape: 'dot', text: err.toString() });
-        });
-
-        const { pid } = this.ffmpeg;
-
-        if (pid) {
-          this.running = true;
-
-          const message = `pid: ${pid}`;
-
-          const topic = this.getTopic(0);
-
-          const status = 'spawn';
-
-          this.status({ fill: 'green', shape: 'dot', text: message });
-
-          this.send({ topic, payload: { status, pid } });
-
-          this.ffmpeg.once('close', (code, signal) => {
-            this.ffmpeg.stdin.removeAllListeners('error');
-
-            for (let i = 1; i < this.stdio.length; ++i) {
-              if (this.stdio[i] === 'pipe') {
-                this.ffmpeg.stdio[i].removeAllListeners('data');
-              }
-            }
-
-            const { pid, killed } = this.ffmpeg;
-
-            const message = `code: ${code}, signal: ${signal}, killed: ${killed}`;
-
-            const topic = 'status';
-
-            const status = 'close';
-
-            this.status({ fill: 'red', shape: 'dot', text: message });
-
-            this.send({ topic, payload: { status, pid, code, signal, killed } });
-
-            this.ffmpeg = undefined;
-
-            this.running = false;
-          });
-
-          this.ffmpeg.stdin.on('error', err => {
-            console.log(`${this.id}: ${err.toString()}`);
-          });
-
-          if (Buffer.isBuffer(payload)) {
-            this.ffmpeg.stdin.write(payload);
-          }
-
-          for (let i = 1; i < this.stdio.length; ++i) {
-            if (this.stdio[i] === 'pipe') {
-              const topic = this.getTopic(i);
-
-              if (this.splitOutput) {
-                const wires = [];
-
-                this.ffmpeg.stdio[i].on('data', data => {
-                  wires[i] = { topic, payload: data };
-
-                  this.send(wires);
-                });
-              } else {
-                this.ffmpeg.stdio[i].on('data', data => {
-                  this.send({ topic, payload: data });
-                });
-              }
-            }
-          }
         }
       }
     }
