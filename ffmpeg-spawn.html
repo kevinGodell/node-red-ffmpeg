@@ -35,7 +35,7 @@
       cmdOutputs: {
         value: 0,
         validate: function (cmdOutputs) {
-          return cmdOutputs >= 0 && cmdOutputs <= 5;
+          return cmdOutputs >= 0 && cmdOutputs <= RED.settings.ffmpegSpawn.cmdOutputsMax;
         },
       },
       killSignal: {
@@ -96,7 +96,7 @@
         });
 
       const cmdOutputsMin = 0;
-      const cmdOutputsMax = 5;
+      const cmdOutputsMax = RED.settings.ffmpegSpawn.cmdOutputsMax;
       const cmdOutputs = $('#node-input-cmdOutputs').spinner({
         min: cmdOutputsMin,
         max: cmdOutputsMax,
