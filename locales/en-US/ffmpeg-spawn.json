@@ -13,7 +13,9 @@
     "error": {
       "cmd_path_invalid": "cmdPath \"__cmdPath__\" is invalid",
       "cmd_args_invalid": "cmdArgs \"__cmdArgs__\" is invalid",
-      "cmd_outputs_invalid": "cmdOutputs \"__cmdOutputs__\" is invalid"
+      "cmd_outputs_invalid": "cmdOutputs \"__cmdOutputs__\" is invalid",
+      "cmd_topics_invalid": "cmdTopics \"__cmdTopics__\" is invalid"
+
     }
   }
 }
