@@ -15,6 +15,8 @@ module.exports = RED => {
 
   const { cmdPath = 'ffmpeg' } = ffmpegSpawn;
 
+  const cmdOutputsMax = Number.isInteger(ffmpegSpawn.cmdOutputsMax) && ffmpegSpawn.cmdOutputsMax > 5 ? ffmpegSpawn.cmdOutputsMax : 5;
+
   class FfmpegSpawnNode {
     constructor(config) {
       createNode(this, config);
@@ -65,9 +67,53 @@ module.exports = RED => {
     }
 
     static validateCmdOutputs(cmdOutputs) {
-      if (!Number.isInteger(cmdOutputs) || cmdOutputs < 0 || cmdOutputs > 5) {
+      if (!Number.isInteger(cmdOutputs) || cmdOutputs < 0 || cmdOutputs > cmdOutputsMax) {
         throw new Error(_('ffmpeg-spawn.error.cmd_outputs_invalid', { cmdOutputs }));
       }
+    }
+
+    static validateCmdTopics(cmdTopics, cmdOutputs) {
+      if (!Array.isArray(cmdTopics) || [...new Set(cmdTopics)].length !== cmdOutputs || cmdTopics.includes('status') || cmdTopics.some(topic => typeof topic !== 'string')) {
+        throw new Error(_('ffmpeg-spawn.error.cmd_topics_invalid', { cmdTopics, cmdOutputs }));
+      }
+    }
+
+    static createTopicsFromArray(array) {
+      const topics = ['status'];
+
+      topics.push(...array);
+
+      return topics;
+    }
+
+    static createTopicsFromCount(count) {
+      const topics = ['status'];
+
+      switch (count) {
+        case 0:
+          // do nothing
+
+          break;
+
+        case 1:
+          topics.push('stdout');
+
+          break;
+
+        case 2:
+          topics.push(...['stdout', 'stderr']);
+
+          break;
+
+        default:
+          topics.push(...['stdout', 'stderr']);
+
+          for (let i = 3; i <= count; ++i) {
+            topics.push(`stdio${i}`);
+          }
+      }
+
+      return topics;
     }
 
     static createStdio(cmdOutputs) {
@@ -171,22 +217,40 @@ module.exports = RED => {
             cmdArgs = this.cmdArgs;
           }
 
-          let stdio;
+          let cmdOutputs;
 
           if (!this.splitOutput && typeof outputs !== 'undefined') {
             FfmpegSpawnNode.validateCmdOutputs(outputs); // throws
 
-            stdio = FfmpegSpawnNode.createStdio(outputs);
+            cmdOutputs = outputs;
           } else {
-            stdio = FfmpegSpawnNode.createStdio(this.cmdOutputs);
+            cmdOutputs = this.cmdOutputs;
           }
+
+          let nodeTopics;
+
+          if (!this.splitOutput && typeof topics !== 'undefined') {
+            FfmpegSpawnNode.validateCmdTopics(topics, cmdOutputs); // throws
+
+            nodeTopics = FfmpegSpawnNode.createTopicsFromArray(topics);
+          } else {
+            nodeTopics = FfmpegSpawnNode.createTopicsFromCount(cmdOutputs);
+          }
+
+          const stdio = FfmpegSpawnNode.createStdio(cmdOutputs);
 
           this.ffmpeg = spawn(cmdPath, cmdArgs, { stdio });
 
           this.ffmpeg.on('error', err => {
             this.error(err);
 
-            this.status({ fill: 'red', shape: 'dot', text: err.toString() });
+            const status = 'error';
+
+            const error = err.toString();
+
+            this.status({ fill: 'red', shape: 'dot', text: error });
+
+            this.send({ topic: nodeTopics[0], payload: { status, error } });
           });
 
           const { pid } = this.ffmpeg;
@@ -196,13 +260,11 @@ module.exports = RED => {
 
             const message = `pid: ${pid}`;
 
-            const topic = this.getTopic(0);
-
             const status = 'spawn';
 
             this.status({ fill: 'green', shape: 'dot', text: message });
 
-            this.send({ topic, payload: { status, pid } });
+            this.send({ topic: nodeTopics[0], payload: { status, pid } });
 
             this.ffmpeg.once('close', (code, signal) => {
               this.ffmpeg.stdin.removeAllListeners('error');
@@ -217,13 +279,11 @@ module.exports = RED => {
 
               const message = `code: ${code}, signal: ${signal}, killed: ${killed}`;
 
-              const topic = 'status';
-
               const status = 'close';
 
               this.status({ fill: 'red', shape: 'dot', text: message });
 
-              this.send({ topic, payload: { status, pid, code, signal, killed } });
+              this.send({ topic: nodeTopics[0], payload: { status, pid, code, signal, killed } });
 
               this.ffmpeg = undefined;
 
@@ -240,7 +300,7 @@ module.exports = RED => {
 
             for (let i = 1; i < stdio.length; ++i) {
               if (stdio[i] === 'pipe') {
-                const topic = this.getTopic(i);
+                const topic = nodeTopics[i];
 
                 if (this.splitOutput) {
                   const wires = [];
@@ -289,22 +349,6 @@ module.exports = RED => {
 
       return Promise.resolve();
     }
-
-    getTopic(index) {
-      switch (index) {
-        case 0:
-          return 'status';
-
-        case 1:
-          return 'stdout';
-
-        case 2:
-          return 'stderr';
-
-        default:
-          return `stdio${index}`;
-      }
-    }
   }
 
   FfmpegSpawnNode.type = 'ffmpeg-spawn';
@@ -314,6 +358,7 @@ module.exports = RED => {
       ffmpegSpawn: {
         value: {
           cmdPath,
+          cmdOutputsMax,
         },
         exportable: true,
       },
