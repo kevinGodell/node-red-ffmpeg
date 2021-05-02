@@ -202,13 +202,20 @@
 </script>
 
 <script data-help-name="ffmpeg-spawn" type="text/html">
-  <p>Spawn a long running ffmpeg process to handle video/image processing.</p>
-  <p style="color:red">The ffmpeg executable binary must installed separately.</p>
-  <h3>Inputs</h3>
+  <ul>
+    <li>spawns a long running <a href="https://ffmpeg.org/">ffmpeg</a> process to handle video/image processing</li>
+    <li>designed to be a thin wrapper around ffmpeg using <a href="https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options">child_process.spawn</a></li>
+    <li>ffmpeg executable binary must be <a href="https://github.com/kevinGodell/node-red-contrib-ffmpeg-spawn#node-red-contrib-ffmpeg-spawn">installed</a> separately</li>
+  </ul>
+
+  <h1>Inputs</h1>
   <ul>
     <li>
-      <h4>Video/image buffer</h4>
-      <p>Buffer will be written to ffmpeg's stdin pipe.</p>
+      <h2>Buffer: video/image</h2>
+      <ul>
+        <li>buffer can be written to ffmpeg's stdin pipe</li>
+        <li>ffmpeg's input must be set to stdin <em>-i pipe:0</em></li>
+      </ul>
       <p>Send an input <code>msg</code> structured as:</p>
       <pre class="form-tips" style="min-width: 450px"><code>
 {
@@ -217,11 +224,13 @@
        </code></pre>
     </li>
     <li>
-      <h4>Command: start</h4>
-      <p>Starts the ffmpeg process.</p>
-      <p>Has no effect if it is already running.</p>
-      <p>Optional properties: path, args, outputs, topics.</p>
-      <p>Message output must be set to <strong>combined</strong> for <em>outputs</em> and <em>topics</em> to be used here.</p>
+      <h2>Command: start</h2>
+      <ul>
+        <li>starts the ffmpeg process</li>
+        <li>has no effect if it is already running</li>
+        <li>optional properties: path, args, outputs, topics</li>
+        <li>message output must be set to <strong>combined</strong> for <em>outputs</em> and <em>topics</em> to be used here</li>
+      </ul>
       <p>Send an input <code>msg</code> structured as:</p>
       <pre class="form-tips" style="min-width: 450px"><code>
 {
@@ -236,10 +245,12 @@
       </code></pre>
     </li>
     <li>
-      <h4>Command: stop</h4>
-      <p>Stops the ffmpeg process.</p>
-      <p>Has no effect if it is not running.</p>
-      <p>Optional properties: signal.</p>
+      <h2>Command: stop</h2>
+      <ul>
+        <li>stops the ffmpeg process</li>
+        <li>has no effect if it is not running</li>
+        <li>optional properties: signal</li>
+      </ul>
       <p>Send an input <code>msg</code> structured as:</p>
       <pre class="form-tips" style="min-width: 450px"><code>
 {
@@ -251,11 +262,13 @@
       </code></pre>
     </li>
     <li>
-      <h4>Command: restart</h4>
-      <p>Restarts the ffmpeg process.</p>
-      <p>Convenience command that triggers stop followed by start.</p>
-      <p>Optional properties: path, args, outputs, topics, signal.</p>
-      <p>Message output must be set to <strong>combined</strong> for <em>outputs</em> and <em>topics</em> to be used here.</p>
+      <h2>Command: restart</h2>
+      <ul>
+        <li>restarts the ffmpeg process</li>
+        <li>convenience command that triggers stop followed by start</li>
+        <li>optional properties: path, args, outputs, topics, signal</li>
+        <li>message output must be set to <strong>combined</strong> for <em>outputs</em> and <em>topics</em> to be used here</li>
+      </ul>
       <p>Send an input <code>msg</code> structured as:</p>
       <pre class="form-tips" style="min-width: 450px"><code>
 {
@@ -274,37 +287,41 @@
 
   <dl class="message-properties">
     <dt class="required">command<span class="property-type">string</span></dt>
-    <dd>value: 'start' | 'stop' | 'restart'</dd>
+    <dd>example: 'start'</dd>
+    <dd>accepts: 'start' | 'stop' | 'restart'</dd>
     <dd>Start, stop, or restart the ffmpeg process.</dd>
 
     <dt class="optional">path<span class="property-type">string</span></dt>
-    <dd>value: 'ffmpeg'</dd>
+    <dd>example: '/home/pi/.node-red/node_modules/ffmpeg-for-homebridge/ffmpeg'</dd>
     <dd>Path to the ffmpeg executable binary.</dd>
 
     <dt class="optional">args<span class="property-type">array</span></dt>
-    <dd>value: ['-loglevel', 'trace', '-version']</dd>
+    <dd>example: ['-loglevel', 'trace', '-version']</dd>
     <dd>Arguments passed to the ffmpeg process.</dd>
 
     <dt class="optional">outputs<span class="property-type">number</span></dt>
-    <dd>value: 3</dd>
-    <dd>Sets the stdio output pipes for the ffmpeg process.</dd>
+    <dd>example: 3</dd>
+    <dd>accepts: 0 to 5</dd>
+    <dd>Number of stdio output pipes to attach to the ffmpeg process.</dd>
     <dd>For example, if stdout, stderr, and stdio[3] are needed for piping, set value to 3.</dd>
-    <dd>Message output must be set to 'combined' to use this property with the action command.</dd>
+    <dd>Message output must be set to <strong>combined</strong> to use this property with the action command.</dd>
 
     <dt class="optional">topics<span class="property-type">array</span></dt>
-    <dd>value: ['mp4', 'logs', 'jpeg', 'progress']</dd>
+    <dd>example: ['mp4', 'logs', 'jpeg', 'progress']</dd>
     <dd>Array must only contain strings and be the same length as outputs.</dd>
     <dd>Defaults to ['stdout', 'stderr', 'stdio3', 'stdio4',...] if not set.</dd>
-    <dd>Message output must be set to 'combined' to use this property with the action command.</dd>
+    <dd>Message output must be set to <strong>combined</strong> to use this property with the action command.</dd>
   </dl>
 
-  <h3>Outputs</h3>
+  <h1>Outputs</h1>
   <ol>
     <li>
-      <h4>Status</h4>
-      <p>Topic will be 'status'</p>
-      <p>Payload will have property status: 'spawn' | 'close' | 'error'</p>
-      <p>Additional payload properties: pid, code, signal, killed, error</p>
+      <h2>Status</h2>
+      <ul>
+        <li>topic will be 'status'</li>
+        <li>payload will have property status: 'spawn' | 'close' | 'error'</li>
+        <li>additional payload properties: pid, code, signal, killed, error</li>
+      </ul>
       <p>Sends an output <code>msg</code> structured as:</p>
       <pre class="form-tips" style="min-width: 450px"><code>
 {
@@ -338,9 +355,11 @@
       </code></pre>
     </li>
     <li>
-      <h4>Buffer</h4>
-      <p>Topic can be 'stdout' | 'stderr' | 'pipe3' | 'pipe4' | 'custom_name' | etc.</p>
-      <p>If message output is set to 'combined', output topics can be changed via input.</p>
+      <h2>Buffer</h2>
+      <ul>
+        <li>topic can be 'stdout' | 'stderr' | 'pipe3' | 'pipe4' | 'custom_name' | etc.</li>
+        <li>if message output is set to <strong>combined</strong>, output topics can be changed via input</li>
+      </ul>
       <p>Sends an output <code>msg</code> structured as:</p>
       <pre class="form-tips" style="min-width: 450px"><code>
 {
@@ -363,32 +382,65 @@
     </li>
   </ol>
 
-  <h3>Settings</h3>
+  <h1>Properties</h1>
 
-  <h4>Spawn options</h4>
+  <h2>Spawn options</h2>
 
   <p><code>Path</code></p>
-  <p>Path to the ffmpeg executable binary.</p>
-  <p>Can be overridden via the input message.</p>
+  <ul>
+    <li>path to the ffmpeg executable binary</li>
+    <li>can be overridden via the input message</li>
+  </ul>
 
   <p><code>Args</code></p>
-  <p>Arguments passed to the ffmpeg process.</p>
-  <p>Can be overridden via the input message.</p>
+  <ul>
+    <li>arguments passed to the ffmpeg process</li>
+    <li>can be overridden via the input message</li>
+  </ul>
 
   <p><code>Outputs</code></p>
-  <p>Number of stdio output pipes to attach to the ffmpeg process.</p>
-  <p>Can be overridden via the input message if message output set to 'combined'.</p>
+  <ul>
+    <li>number of stdio output pipes to attach to the ffmpeg process</li>
+    <li>can be overridden via the input message if message output set to <strong>combined</strong></li>
+  </ul>
 
-  <h4>Close options</h4>
+  <h2>Close options</h2>
 
   <p><code>Signal</code></p>
-  <p>Kill signal used when closing the ffmpeg process.</p>
-  <p>Can be overridden via the input message.</p>
+  <ul>
+    <li>kill signal used when closing the ffmpeg process</li>
+    <li>can be overridden via the input message</li>
+  </ul>
 
-  <h4>Message options</h4>
+  <h2>Message options</h2>
 
   <p><code>Output</code></p>
-  <p>Node output messages can be combined or split.</p>
-  <p>If combined, then filter output by topic.</p>
-  <p>If split, then wire nodes to distinct outputs.</p>
+  <ul>
+    <li>node output messages can be combined or split</li>
+    <li>if set to <strong>combined</strong>, then filter output by topic</li>
+    <li>if set to <strong>split</strong>, then wire nodes to distinct outputs</li>
+  </ul>
+
+  <h1>Settings</h1>
+
+  <h2>Configured in <a href="https://nodered.org/docs/user-guide/runtime/settings-file">settings.js</a></h2>
+
+  <p><code>cmdPath</code></p>
+  <ul>
+    <li>default path to ffmpeg</li>
+  </ul>
+
+  <p><code>cmdOutputsMax</code></p>
+  <ul>
+    <li>maximum stdio output pipes</li>
+  </ul>
+
+  <pre class="form-tips" style="min-width: 450px"><code>
+{
+  ffmpegSpawn: {
+    cmdPath: '/path/to/ffmpeg',
+    cmdOutputsMax: 10
+  }
+}
+  </code></pre>
 </script>
