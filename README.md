@@ -8,7 +8,7 @@
 ### Expectations:
 * You should have working knowledge of ffmpeg on the command line.
 * If you have difficulties making it work, please open a new [discussion](https://discourse.nodered.org/) and tag me `@kevinGodell`.
-* Please, do not send private messages asking for help because that will not benefit other users with similar issues.
+* Please, do not send private messages asking for help because that will not benefit others with similar issues.
 
 ### Installation:
 ```
@@ -32,3 +32,6 @@ See the detailed help text in the side bar.
 ![editor2.png](https://raw.githubusercontent.com/kevinGodell/node-red-contrib-ffmpeg-spawn/main/screenshots/editor2.png)
 
 ![settings1.png](https://raw.githubusercontent.com/kevinGodell/node-red-contrib-ffmpeg-spawn/main/screenshots/settings1.png)
+
+### Flows:
+Coming soon...
