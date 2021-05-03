@@ -19,7 +19,7 @@ yarn add node-red-contrib-ffmpeg-spawn
 ```
 
 ### Instructions:
-See the detailed help text in the side bar.
+* See the detailed help text in the side bar.
 
 ### Screenshots:
 
