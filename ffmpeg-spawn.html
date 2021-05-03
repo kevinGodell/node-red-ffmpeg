@@ -205,7 +205,7 @@
   <ul>
     <li>spawns a long running <a href="https://ffmpeg.org/">ffmpeg</a> process to handle video/image processing</li>
     <li>designed to be a thin wrapper around ffmpeg using <a href="https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options">child_process.spawn</a></li>
-    <li>ffmpeg executable binary must be <a href="https://github.com/kevinGodell/node-red-contrib-ffmpeg-spawn#node-red-contrib-ffmpeg-spawn">installed</a> separately</li>
+    <li>ffmpeg executable binary must be installed or built separately</li>
   </ul>
 
   <h1>Inputs</h1>
@@ -308,8 +308,8 @@
 
     <dt class="optional">topics<span class="property-type">array</span></dt>
     <dd>example: ['mp4', 'logs', 'jpeg', 'progress']</dd>
-    <dd>Array must only contain strings and be the same length as outputs.</dd>
-    <dd>Defaults to ['stdout', 'stderr', 'stdio3', 'stdio4',...] if not set.</dd>
+    <dd>Array must only contain unique strings and be the same length as outputs.</dd>
+    <dd>If not set, defaults to ['stdout', 'stderr', 'stdio3', 'stdio4', ...].</dd>
     <dd>Message output must be set to <strong>combined</strong> to use this property with the action command.</dd>
   </dl>
 
@@ -357,7 +357,7 @@
     <li>
       <h2>Buffer</h2>
       <ul>
-        <li>topic can be 'stdout' | 'stderr' | 'pipe3' | 'pipe4' | 'custom_name' | etc.</li>
+        <li>topic can be 'stdout' | 'stderr' | 'stdio3' | 'stdio4' | 'custom_name' | etc.</li>
         <li>if message output is set to <strong>combined</strong>, output topics can be changed via input</li>
       </ul>
       <p>Sends an output <code>msg</code> structured as:</p>
