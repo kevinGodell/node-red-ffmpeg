@@ -11,11 +11,21 @@
 * Please, do not send private messages asking for help because that will not benefit others with similar issues.
 
 ### Installation:
+* go to the correct directory, usually ~/.node-red
+```
+cd ~/.node-red
+```
+* using npm
 ```
 npm install node-red-contrib-ffmpeg-spawn
 ```
+* using yarn
 ```
 yarn add node-red-contrib-ffmpeg-spawn
+```
+* reboot the node-red server
+```
+node-red-stop && node-red-start
 ```
 
 ### Instructions:
