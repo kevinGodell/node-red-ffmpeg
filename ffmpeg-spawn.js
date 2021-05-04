@@ -13,7 +13,7 @@ module.exports = RED => {
 
   const { ffmpegSpawn = {} } = settings;
 
-  const { cmdPath = 'ffmpeg' } = ffmpegSpawn;
+  const cmdPath = typeof ffmpegSpawn.cmdPath === 'string' ? ffmpegSpawn.cmdPath.trim() : 'ffmpeg';
 
   const cmdOutputsMax = Number.isInteger(ffmpegSpawn.cmdOutputsMax) && ffmpegSpawn.cmdOutputsMax > 5 ? ffmpegSpawn.cmdOutputsMax : 5;
 
