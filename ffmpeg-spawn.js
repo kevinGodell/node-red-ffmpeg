@@ -11,11 +11,17 @@ module.exports = RED => {
     nodes: { createNode, registerType },
   } = RED;
 
-  const { ffmpegSpawn = {} } = settings;
+  if (typeof settings.ffmpegSpawn !== 'object') {
+    settings.ffmpegSpawn = {};
+  }
 
-  const cmdPath = typeof ffmpegSpawn.cmdPath === 'string' ? ffmpegSpawn.cmdPath.trim() : 'ffmpeg';
+  const { ffmpegSpawn } = settings;
 
-  const cmdOutputsMax = Number.isInteger(ffmpegSpawn.cmdOutputsMax) && ffmpegSpawn.cmdOutputsMax > 5 ? ffmpegSpawn.cmdOutputsMax : 5;
+  ffmpegSpawn.cmdPath = /ffmpeg/i.test(ffmpegSpawn.cmdPath) ? ffmpegSpawn.cmdPath.trim() : 'ffmpeg';
+
+  ffmpegSpawn.cmdOutputsMax = Number.isInteger(ffmpegSpawn.cmdOutputsMax) && ffmpegSpawn.cmdOutputsMax > 5 ? ffmpegSpawn.cmdOutputsMax : 5;
+
+  const { cmdPath, cmdOutputsMax } = ffmpegSpawn;
 
   class FfmpegSpawnNode {
     constructor(config) {
