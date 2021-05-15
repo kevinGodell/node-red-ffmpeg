@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "pack": "npm pack",
-    "pretty": "prettier --write *.html",
+    "pretty": "prettier --write **/*.html",
     "lint": "eslint --fix --ext .js --ignore-path .gitignore .",
     "clean": "npm run lint && npm run pretty"
   },
@@ -32,7 +32,8 @@
     "ffmpeg-spawn.html",
     "lib/ffmpeg.js",
     "lib/jsonParse.js",
-    "locales/en-US/ffmpeg-spawn.json"
+    "locales/en-US/ffmpeg-spawn.json",
+    "locales/en-US/ffmpeg-spawn.html"
   ],
   "dependencies": {},
   "node-red": {
