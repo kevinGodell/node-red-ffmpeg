@@ -18,7 +18,7 @@ module.exports = RED => {
 
         this.running = false;
 
-        this.cmdPath = config.cmdPath.trim() || cmdPath;
+        this.cmdPath = config.cmdPath.trim() || FfmpegSpawnNode.cmdPath;
 
         this.cmdArgs = config.cmdArgs ? FfmpegSpawnNode.jsonParse(config.cmdArgs) : ['-version'];
 
@@ -362,6 +362,10 @@ module.exports = RED => {
   ffmpegSpawn.cmdOutputsMax = Number.isInteger(ffmpegSpawn.cmdOutputsMax) && ffmpegSpawn.cmdOutputsMax > 5 ? ffmpegSpawn.cmdOutputsMax : 5;
 
   const { cmdPath, cmdOutputsMax } = ffmpegSpawn;
+
+  FfmpegSpawnNode.cmdPath = cmdPath;
+
+  FfmpegSpawnNode.cmdOutputsMax = cmdOutputsMax;
 
   FfmpegSpawnNode.type = 'ffmpeg-spawn';
 
