@@ -1,7 +1,5 @@
 'use strict';
 
-const jsonParse = require('./lib/jsonParse');
-
 const { spawn, ChildProcess } = require('child_process');
 
 module.exports = RED => {
@@ -10,18 +8,6 @@ module.exports = RED => {
     _,
     nodes: { createNode, registerType },
   } = RED;
-
-  if (typeof settings.ffmpegSpawn !== 'object') {
-    settings.ffmpegSpawn = {};
-  }
-
-  const { ffmpegSpawn } = settings;
-
-  ffmpegSpawn.cmdPath = /ffmpeg/i.test(ffmpegSpawn.cmdPath) ? ffmpegSpawn.cmdPath.trim() : 'ffmpeg';
-
-  ffmpegSpawn.cmdOutputsMax = Number.isInteger(ffmpegSpawn.cmdOutputsMax) && ffmpegSpawn.cmdOutputsMax > 5 ? ffmpegSpawn.cmdOutputsMax : 5;
-
-  const { cmdPath, cmdOutputsMax } = ffmpegSpawn;
 
   class FfmpegSpawnNode {
     constructor(config) {
@@ -34,7 +20,7 @@ module.exports = RED => {
 
         this.cmdPath = config.cmdPath.trim() || cmdPath;
 
-        this.cmdArgs = config.cmdArgs ? jsonParse(config.cmdArgs) : ['-version'];
+        this.cmdArgs = config.cmdArgs ? FfmpegSpawnNode.jsonParse(config.cmdArgs) : ['-version'];
 
         this.cmdOutputs = parseInt(config.cmdOutputs);
 
@@ -58,93 +44,6 @@ module.exports = RED => {
 
         this.status({ fill: 'red', shape: 'dot', text: err.toString() });
       }
-    }
-
-    static validateCmdPath(cmdPath) {
-      if (!/ffmpeg/i.test(cmdPath)) {
-        throw new Error(_('ffmpeg-spawn.error.cmd_path_invalid', { cmdPath }));
-      }
-    }
-
-    static validateCmdArgs(cmdArgs) {
-      if (!Array.isArray(cmdArgs)) {
-        throw new Error(_('ffmpeg-spawn.error.cmd_args_invalid', { cmdArgs }));
-      }
-    }
-
-    static validateCmdOutputs(cmdOutputs) {
-      if (!Number.isInteger(cmdOutputs) || cmdOutputs < 0 || cmdOutputs > cmdOutputsMax) {
-        throw new Error(_('ffmpeg-spawn.error.cmd_outputs_invalid', { cmdOutputs }));
-      }
-    }
-
-    static validateCmdTopics(cmdTopics, cmdOutputs) {
-      if (!Array.isArray(cmdTopics) || [...new Set(cmdTopics)].length !== cmdOutputs || cmdTopics.includes('status') || cmdTopics.some(topic => typeof topic !== 'string')) {
-        throw new Error(_('ffmpeg-spawn.error.cmd_topics_invalid', { cmdTopics, cmdOutputs }));
-      }
-    }
-
-    static createTopicsFromArray(array) {
-      const topics = ['status'];
-
-      topics.push(...array);
-
-      return topics;
-    }
-
-    static createTopicsFromCount(count) {
-      const topics = ['status'];
-
-      switch (count) {
-        case 0:
-          // do nothing
-
-          break;
-
-        case 1:
-          topics.push('stdout');
-
-          break;
-
-        case 2:
-          topics.push(...['stdout', 'stderr']);
-
-          break;
-
-        default:
-          topics.push(...['stdout', 'stderr']);
-
-          for (let i = 3; i <= count; ++i) {
-            topics.push(`stdio${i}`);
-          }
-      }
-
-      return topics;
-    }
-
-    static createStdio(cmdOutputs) {
-      const stdio = ['pipe'];
-
-      switch (cmdOutputs) {
-        case 0:
-          stdio.push(...['ignore', 'ignore']);
-
-          break;
-
-        case 1:
-          stdio.push(...['pipe', 'ignore']);
-
-          break;
-
-        default:
-          for (let i = 0; i < cmdOutputs; ++i) {
-            stdio.push('pipe');
-          }
-
-          break;
-      }
-
-      return stdio;
     }
 
     async onInput(msg) {
@@ -355,7 +254,114 @@ module.exports = RED => {
 
       return Promise.resolve();
     }
+
+    static validateCmdPath(cmdPath) {
+      if (!/ffmpeg/i.test(cmdPath)) {
+        throw new Error(_('ffmpeg-spawn.error.cmd_path_invalid', { cmdPath }));
+      }
+    }
+
+    static validateCmdArgs(cmdArgs) {
+      if (!Array.isArray(cmdArgs)) {
+        throw new Error(_('ffmpeg-spawn.error.cmd_args_invalid', { cmdArgs }));
+      }
+    }
+
+    static validateCmdOutputs(cmdOutputs) {
+      if (!Number.isInteger(cmdOutputs) || cmdOutputs < 0 || cmdOutputs > cmdOutputsMax) {
+        throw new Error(_('ffmpeg-spawn.error.cmd_outputs_invalid', { cmdOutputs }));
+      }
+    }
+
+    static validateCmdTopics(cmdTopics, cmdOutputs) {
+      if (!Array.isArray(cmdTopics) || [...new Set(cmdTopics)].length !== cmdOutputs || cmdTopics.includes('status') || cmdTopics.some(topic => typeof topic !== 'string')) {
+        throw new Error(_('ffmpeg-spawn.error.cmd_topics_invalid', { cmdTopics, cmdOutputs }));
+      }
+    }
+
+    static createTopicsFromArray(array) {
+      const topics = ['status'];
+
+      topics.push(...array);
+
+      return topics;
+    }
+
+    static createTopicsFromCount(count) {
+      const topics = ['status'];
+
+      switch (count) {
+        case 0:
+          // do nothing
+
+          break;
+
+        case 1:
+          topics.push('stdout');
+
+          break;
+
+        case 2:
+          topics.push(...['stdout', 'stderr']);
+
+          break;
+
+        default:
+          topics.push(...['stdout', 'stderr']);
+
+          for (let i = 3; i <= count; ++i) {
+            topics.push(`stdio${i}`);
+          }
+      }
+
+      return topics;
+    }
+
+    static createStdio(cmdOutputs) {
+      const stdio = ['pipe'];
+
+      switch (cmdOutputs) {
+        case 0:
+          stdio.push(...['ignore', 'ignore']);
+
+          break;
+
+        case 1:
+          stdio.push(...['pipe', 'ignore']);
+
+          break;
+
+        default:
+          for (let i = 0; i < cmdOutputs; ++i) {
+            stdio.push('pipe');
+          }
+
+          break;
+      }
+
+      return stdio;
+    }
+
+    static jsonParse(str) {
+      try {
+        return JSON.parse(str);
+      } catch (e) {
+        return str;
+      }
+    }
   }
+
+  if (typeof settings.ffmpegSpawn !== 'object') {
+    settings.ffmpegSpawn = {};
+  }
+
+  const { ffmpegSpawn } = settings;
+
+  ffmpegSpawn.cmdPath = /ffmpeg/i.test(ffmpegSpawn.cmdPath) ? ffmpegSpawn.cmdPath.trim() : 'ffmpeg';
+
+  ffmpegSpawn.cmdOutputsMax = Number.isInteger(ffmpegSpawn.cmdOutputsMax) && ffmpegSpawn.cmdOutputsMax > 5 ? ffmpegSpawn.cmdOutputsMax : 5;
+
+  const { cmdPath, cmdOutputsMax } = ffmpegSpawn;
 
   FfmpegSpawnNode.type = 'ffmpeg-spawn';
 
