@@ -30,8 +30,6 @@
   "files": [
     "ffmpeg-spawn.js",
     "ffmpeg-spawn.html",
-    "lib/ffmpeg.js",
-    "lib/jsonParse.js",
     "locales/en-US/ffmpeg-spawn.json",
     "locales/en-US/ffmpeg-spawn.html"
   ],
