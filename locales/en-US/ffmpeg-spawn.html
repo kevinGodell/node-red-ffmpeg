@@ -244,15 +244,6 @@
   </ul>
 
   <h3>Settings</h3>
-  <p style="margin-left: 15px">Configured in <a href="https://nodered.org/docs/user-guide/runtime/settings-file">settings.js</a></p>
-  <pre class="form-tips" style="min-width: 450px; margin-left: 15px"><code>
-{
-  ffmpegSpawn: {
-    cmdPath: '/path/to/ffmpeg',
-    cmdOutputsMax: 10
-  }
-}
-  </code></pre>
   <ul>
     <li>
       <h4><code>cmdPath</code></h4>
@@ -267,4 +258,21 @@
       </ul>
     </li>
   </ul>
+  <p style="margin-left: 15px">Configured in <a href="https://nodered.org/docs/user-guide/runtime/settings-file">settings.js</a></p>
+  <pre class="form-tips" style="min-width: 450px; margin-left: 15px"><code>
+{
+  ffmpegSpawn: {
+    cmdPath: '/path/to/ffmpeg',
+    cmdOutputsMax: 6
+  }
+}
+  </code></pre>
+  <pre class="form-tips" style="min-width: 450px; margin-left: 15px"><code>
+{
+  ffmpegSpawn: {
+    cmdPath: require('ffmpeg-for-homebridge'),
+    cmdOutputsMax: 10
+  }
+}
+  </code></pre>
 </script>
