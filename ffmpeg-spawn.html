@@ -166,15 +166,21 @@
   <fieldset>
     <legend>spawn options</legend>
 
+    <p class="form-tips">Path to the ffmpeg binary executable.</p>
+
     <div class="form-row">
       <label for="node-input-cmdPath"><i class="fa fa-terminal"></i> Path</label>
       <input type="text" id="node-input-cmdPath" />
     </div>
 
+    <p class="form-tips">Arguments passed to the ffmpeg process.</p>
+
     <div class="form-row">
       <label for="node-input-cmdArgs"><i class="fa fa-gears"></i> Args</label>
       <input id="node-input-cmdArgs" />
     </div>
+
+    <p class="form-tips">Number of stdio outputs attached to the ffmpeg process.</p>
 
     <div class="form-row">
       <label for="node-input-cmdOutputs"><i class="fa fa-random"></i> Outputs</label>
@@ -185,6 +191,8 @@
   <fieldset>
     <legend>close options</legend>
 
+    <p class="form-tips">Kill signal used to terminate the ffmpeg process.</p>
+
     <div class="form-row">
       <label for="node-input-killSignal"><i class="fa fa-times"></i> Signal</label>
       <input id="node-input-killSignal" />
@@ -193,6 +201,8 @@
 
   <fieldset>
     <legend>message options</legend>
+
+    <p class="form-tips">Split or combine the node's output messages.</p>
 
     <div class="form-row">
       <label for="node-input-msgOutput"><i class="fa fa-envelope"></i> Output</label>
