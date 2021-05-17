@@ -86,31 +86,34 @@
   }
 }
           </code></pre>
-          <dl class="message-properties">
-            <dt class="required">command<span class="property-type">string</span></dt>
-            <dd>example: 'start'</dd>
-            <dd>accepts: 'start' | 'stop' | 'restart'</dd>
-            <dd>Start, stop, or restart the ffmpeg process.</dd>
-            <dt class="optional">path<span class="property-type">string</span></dt>
-            <dd>example: '/home/pi/.node-red/node_modules/ffmpeg-for-homebridge/ffmpeg'</dd>
-            <dd>Path to the ffmpeg executable binary.</dd>
-            <dt class="optional">args<span class="property-type">array</span></dt>
-            <dd>example: ['-loglevel', 'trace', '-version']</dd>
-            <dd>Arguments passed to the ffmpeg process.</dd>
-            <dt class="optional">outputs<span class="property-type">number</span></dt>
-            <dd>example: 3</dd>
-            <dd>accepts: 0 to 5</dd>
-            <dd>Number of stdio output pipes to attach to the ffmpeg process.</dd>
-            <dd>For example, if stdout, stderr, and stdio[3] are needed for piping, set value to 3.</dd>
-            <dd>Message output must be set to <strong>combined</strong> to use this property with the action command.</dd>
-            <dt class="optional">topics<span class="property-type">array</span></dt>
-            <dd>example: ['mp4', 'logs', 'jpeg', 'progress']</dd>
-            <dd>Array must only contain unique strings and be the same length as outputs.</dd>
-            <dd>If not set, defaults to ['stdout', 'stderr', 'stdio3', 'stdio4', ...].</dd>
-            <dd>Message output must be set to <strong>combined</strong> to use this property with the action command.</dd>
-          </dl>
         </li>
       </ul>
+    </li>
+    <li>
+      <h4>Definitions:</h4>
+      <dl class="message-properties">
+        <dt class="required">command<span class="property-type">string</span></dt>
+        <dd>example: 'start'</dd>
+        <dd>accepts: 'start' | 'stop' | 'restart'</dd>
+        <dd>Start, stop, or restart the ffmpeg process.</dd>
+        <dt class="optional">path<span class="property-type">string</span></dt>
+        <dd>example: '/home/pi/.node-red/node_modules/ffmpeg-for-homebridge/ffmpeg'</dd>
+        <dd>Path to the ffmpeg executable binary.</dd>
+        <dt class="optional">args<span class="property-type">array</span></dt>
+        <dd>example: ['-loglevel', 'trace', '-version']</dd>
+        <dd>Arguments passed to the ffmpeg process.</dd>
+        <dt class="optional">outputs<span class="property-type">number</span></dt>
+        <dd>example: 3</dd>
+        <dd>accepts: 0 to 5</dd>
+        <dd>Number of stdio output pipes to attach to the ffmpeg process.</dd>
+        <dd>For example, if stdout, stderr, and stdio[3] are needed for piping, set value to 3.</dd>
+        <dd>Message output must be set to <strong>combined</strong> to use this property with the action command.</dd>
+        <dt class="optional">topics<span class="property-type">array</span></dt>
+        <dd>example: ['mp4', 'logs', 'jpeg', 'progress']</dd>
+        <dd>Array must only contain unique strings and be the same length as outputs.</dd>
+        <dd>If not set, defaults to ['stdout', 'stderr', 'stdio3', 'stdio4', ...].</dd>
+        <dd>Message output must be set to <strong>combined</strong> to use this property with the action command.</dd>
+      </dl>
     </li>
   </ul>
 
