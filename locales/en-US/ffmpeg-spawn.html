@@ -11,9 +11,9 @@
       <h4>Buffer: video/image</h4>
       <ul>
         <li>buffer can be written to ffmpeg's stdin pipe</li>
-        <li>ffmpeg's input must be set to stdin <em>-i pipe:0</em></li>
+        <li>ffmpeg's input must be set to stdin <i>-i pipe:0</i></li>
         <li>
-          <p>Send an input <code>msg</code> structured as:</p>
+          send an input <code>msg</code> structured as:
           <pre class="form-tips" style="min-width: 450px"><code>
 {
   payload: &lt;Buffer&gt;
@@ -28,9 +28,9 @@
         <li>starts the ffmpeg process</li>
         <li>has no effect if it is already running</li>
         <li>optional properties: path, args, outputs, topics</li>
-        <li>message output must be set to <strong>combined</strong> for <em>outputs</em> and <em>topics</em> to be used here</li>
+        <li>message output must be set to <b>combined</b> for <i>outputs</i> and <i>topics</i> to be used here</li>
         <li>
-          <p>Send an input <code>msg</code> structured as:</p>
+          send an input <code>msg</code> structured as:
           <pre class="form-tips" style="min-width: 450px"><code>
 {
   action: {
@@ -52,7 +52,7 @@
         <li>has no effect if it is not running</li>
         <li>optional properties: signal</li>
         <li>
-          <p>Send an input <code>msg</code> structured as:</p>
+          send an input <code>msg</code> structured as:
           <pre class="form-tips" style="min-width: 450px"><code>
 {
   action: {
@@ -70,9 +70,9 @@
         <li>restarts the ffmpeg process</li>
         <li>convenience command that triggers stop followed by start</li>
         <li>optional properties: signal, path, args, outputs, topics</li>
-        <li>message output must be set to <strong>combined</strong> for <em>outputs</em> and <em>topics</em> to be used here</li>
+        <li>message output must be set to <b>combined</b> for <i>outputs</i> and <i>topics</i> to be used here</li>
         <li>
-          <p>Send an input <code>msg</code> structured as:</p>
+          send an input <code>msg</code> structured as:
           <pre class="form-tips" style="min-width: 450px"><code>
 {
   action: {
@@ -107,12 +107,12 @@
         <dd>accepts: 0 to 5</dd>
         <dd>Number of stdio outputs attached to the ffmpeg process.</dd>
         <dd>For example, if stdout, stderr, and stdio[3] are needed for piping, set value to 3.</dd>
-        <dd>Message output must be set to <strong>combined</strong> to use this property with the action command.</dd>
+        <dd>Message output must be set to <b>combined</b> to use this property with the action command.</dd>
         <dt class="optional">topics<span class="property-type">array</span></dt>
         <dd>example: ['mp4', 'logs', 'jpeg', 'progress']</dd>
         <dd>Array must only contain unique strings and be the same length as outputs.</dd>
         <dd>If not set, defaults to ['stdout', 'stderr', 'stdio3', 'stdio4', ...].</dd>
-        <dd>Message output must be set to <strong>combined</strong> to use this property with the action command.</dd>
+        <dd>Message output must be set to <b>combined</b> to use this property with the action command.</dd>
       </dl>
     </li>
   </ul>
@@ -126,7 +126,7 @@
         <li>payload will have property status: 'spawn' | 'close' | 'error'</li>
         <li>additional payload properties: pid, code, signal, killed, error</li>
         <li>
-          <p>Sends an output <code>msg</code> structured as:</p>
+          sends an output <code>msg</code> structured as:
           <pre class="form-tips" style="min-width: 450px"><code>
 {
   topic: 'status',
@@ -164,9 +164,9 @@
       <h4>Buffer</h4>
       <ul>
         <li>topic can be 'stdout' | 'stderr' | 'stdio3' | 'stdio4' | 'custom_name' | etc.</li>
-        <li>if message output is set to <strong>combined</strong>, output topics can be changed via input</li>
+        <li>if message output is set to <b>combined</b>, output topics can be changed via input</li>
         <li>
-          <p>Sends an output <code>msg</code> structured as:</p>
+          sends an output <code>msg</code> structured as:
           <pre class="form-tips" style="min-width: 450px"><code>
 {
   topic: 'stdout',
@@ -213,8 +213,8 @@
         <li>
           <h5>Outputs</h5>
           <ul>
-            <li>number of stdio output pipes to attach to the ffmpeg process</li>
-            <li>can be overridden via the input message if message output set to <strong>combined</strong></li>
+            <li>number of stdio outputs attached to the ffmpeg process</li>
+            <li>can be overridden via the input message if message output set to <b>combined</b></li>
           </ul>
         </li>
       </ul>
@@ -225,7 +225,7 @@
         <li>
           <h5>Signal</h5>
           <ul>
-            <li>kill signal used when closing the ffmpeg process</li>
+            <li>kill signal used when terminating the ffmpeg process</li>
             <li>can be overridden via the input message</li>
           </ul>
         </li>
@@ -238,8 +238,8 @@
           <h5>Output</h5>
           <ul>
             <li>node output messages can be combined or split</li>
-            <li>if set to <strong>combined</strong>, then filter output by topic</li>
-            <li>if set to <strong>split</strong>, then wire nodes to distinct outputs</li>
+            <li>if set to <b>combined</b>, then filter output by topic</li>
+            <li>if set to <b>split</b>, then wire nodes to distinct outputs</li>
           </ul>
         </li>
       </ul>
@@ -257,7 +257,7 @@
     <li>
       <h4><code>cmdOutputsMax</code></h4>
       <ul>
-        <li>maximum stdio output pipes</li>
+        <li>maximum stdio outputs</li>
       </ul>
     </li>
   </ul>
