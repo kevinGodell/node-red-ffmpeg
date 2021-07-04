@@ -47,11 +47,15 @@ module.exports = RED => {
     }
 
     async onInput(msg) {
-      const { payload, action } = msg;
+      const { payload, action, filename } = msg;
 
       // needs to be a priority case if being used
       if (this.running && Buffer.isBuffer(payload)) {
-        this.ffmpeg.stdin.write(payload);
+        if (payload.length) {
+          this.ffmpeg.stdin.write(payload);
+        } else {
+          await this.stop();
+        }
 
         return;
       }
@@ -61,7 +65,7 @@ module.exports = RED => {
 
         switch (command) {
           case 'start':
-            this.start(payload, path, args, outputs, topics);
+            this.start(payload, path, args, outputs, topics, filename);
 
             break;
 
@@ -73,7 +77,7 @@ module.exports = RED => {
           case 'restart':
             await this.stop(signal);
 
-            this.start(payload, path, args, outputs, topics);
+            this.start(payload, path, args, outputs, topics, filename);
 
             break;
 
@@ -99,47 +103,47 @@ module.exports = RED => {
       done();
     }
 
-    start(payload, path, args, outputs, topics) {
+    start(_payload, _cmdPath, _cmdArgs, _cmdOutputs, _topics, _filename) {
       if (!this.running) {
         try {
           let cmdPath;
 
-          if (typeof path !== 'undefined') {
-            FfmpegSpawnNode.validateCmdPath(path); // throws
+          if (typeof _cmdPath !== 'undefined') {
+            FfmpegSpawnNode.validateCmdPath(_cmdPath); // throws
 
-            cmdPath = path;
+            cmdPath = _cmdPath;
           } else {
             cmdPath = this.cmdPath;
           }
 
           let cmdArgs;
 
-          if (typeof args !== 'undefined') {
-            FfmpegSpawnNode.validateCmdArgs(args); // throws
+          if (typeof _cmdArgs !== 'undefined') {
+            FfmpegSpawnNode.validateCmdArgs(_cmdArgs); // throws
 
-            cmdArgs = args;
+            cmdArgs = _cmdArgs;
           } else {
             cmdArgs = this.cmdArgs;
           }
 
           let cmdOutputs;
 
-          if (!this.splitOutput && typeof outputs !== 'undefined') {
-            FfmpegSpawnNode.validateCmdOutputs(outputs); // throws
+          if (!this.splitOutput && typeof _cmdOutputs !== 'undefined') {
+            FfmpegSpawnNode.validateCmdOutputs(_cmdOutputs); // throws
 
-            cmdOutputs = outputs;
+            cmdOutputs = _cmdOutputs;
           } else {
             cmdOutputs = this.cmdOutputs;
           }
 
-          let nodeTopics;
+          let topics;
 
-          if (!this.splitOutput && typeof topics !== 'undefined') {
-            FfmpegSpawnNode.validateCmdTopics(topics, cmdOutputs); // throws
+          if (!this.splitOutput && typeof _topics !== 'undefined') {
+            FfmpegSpawnNode.validateCmdTopics(_topics, cmdOutputs); // throws
 
-            nodeTopics = FfmpegSpawnNode.createTopicsFromArray(topics);
+            topics = FfmpegSpawnNode.createTopicsFromArray(_topics);
           } else {
-            nodeTopics = FfmpegSpawnNode.createTopicsFromCount(cmdOutputs);
+            topics = FfmpegSpawnNode.createTopicsFromCount(cmdOutputs);
           }
 
           const stdio = FfmpegSpawnNode.createStdio(cmdOutputs);
@@ -155,7 +159,7 @@ module.exports = RED => {
 
             this.status({ fill: 'red', shape: 'dot', text: error });
 
-            this.send({ topic: nodeTopics[0], payload: { status, error } });
+            this.send({ topic: topics[0], payload: { status, error } });
           });
 
           const { pid } = this.ffmpeg;
@@ -169,7 +173,7 @@ module.exports = RED => {
 
             this.status({ fill: 'green', shape: 'dot', text: message });
 
-            this.send({ topic: nodeTopics[0], payload: { status, pid } });
+            this.send({ topic: topics[0], payload: { status, pid } });
 
             this.ffmpeg.once('close', (code, signal) => {
               this.ffmpeg.stdin.removeAllListeners('error');
@@ -188,7 +192,7 @@ module.exports = RED => {
 
               this.status({ fill: 'red', shape: 'dot', text: message });
 
-              this.send({ topic: nodeTopics[0], payload: { status, pid, code, signal, killed } });
+              this.send({ topic: topics[0], payload: { status, pid, code, signal, killed } });
 
               this.ffmpeg = undefined;
 
@@ -199,25 +203,27 @@ module.exports = RED => {
               console.log(`${this.id}: ${err.toString()}`);
             });
 
-            if (Buffer.isBuffer(payload)) {
-              this.ffmpeg.stdin.write(payload);
+            if (Buffer.isBuffer(_payload)) {
+              this.ffmpeg.stdin.write(_payload);
             }
 
             for (let i = 1; i < stdio.length; ++i) {
               if (stdio[i] === 'pipe') {
-                const topic = nodeTopics[i];
+                const topic = topics[i];
+
+                const filename = i === 1 && typeof _filename === 'string' ? _filename : Array.isArray(_filename) ? _filename[i - 1] : undefined;
 
                 if (this.splitOutput) {
                   const wires = [];
 
                   this.ffmpeg.stdio[i].on('data', data => {
-                    wires[i] = { topic, payload: data };
+                    wires[i] = { topic, payload: data, filename };
 
                     this.send(wires);
                   });
                 } else {
                   this.ffmpeg.stdio[i].on('data', data => {
-                    this.send({ topic, payload: data });
+                    this.send({ topic, payload: data, filename });
                   });
                 }
               }
@@ -231,7 +237,7 @@ module.exports = RED => {
       }
     }
 
-    stop(signal) {
+    stop(_killSignal) {
       if (this.running && this.ffmpeg instanceof ChildProcess) {
         const { pid, exitCode, signalCode } = this.ffmpeg;
 
@@ -241,7 +247,7 @@ module.exports = RED => {
               resolve();
             });
 
-            const killSignal = ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(signal) ? signal : this.killSignal;
+            const killSignal = ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(_killSignal) ? _killSignal : this.killSignal;
 
             if (this.ffmpeg.kill(0) && !this.ffmpeg.stdin.destroyed) {
               this.ffmpeg.stdin.destroy();
