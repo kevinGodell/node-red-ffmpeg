@@ -61,11 +61,11 @@ module.exports = RED => {
       }
 
       if (typeof action === 'object') {
-        const { command, signal, path, args, outputs, topics } = action;
+        const { command, signal, path, args, env, outputs, topics } = action;
 
         switch (command) {
           case 'start':
-            this.start(payload, path, args, outputs, topics, filename);
+            this.start(payload, path, args, env, outputs, topics, filename);
 
             break;
 
@@ -77,7 +77,7 @@ module.exports = RED => {
           case 'restart':
             await this.stop(signal);
 
-            this.start(payload, path, args, outputs, topics, filename);
+            this.start(payload, path, args, env, outputs, topics, filename);
 
             break;
 
@@ -103,7 +103,7 @@ module.exports = RED => {
       done();
     }
 
-    start(_payload, _cmdPath, _cmdArgs, _cmdOutputs, _topics, _filename) {
+    start(_payload, _cmdPath, _cmdArgs, _cmdEnv, _cmdOutputs, _topics, _filename) {
       if (!this.running) {
         try {
           let cmdPath;
@@ -148,7 +148,9 @@ module.exports = RED => {
 
           const stdio = FfmpegSpawnNode.createStdio(cmdOutputs);
 
-          this.ffmpeg = spawn(cmdPath, cmdArgs, { stdio });
+          const env = typeof _cmdEnv === 'object' ? { ...process.env, ..._cmdEnv } : process.env;
+
+          this.ffmpeg = spawn(cmdPath, cmdArgs, { stdio, env });
 
           this.ffmpeg.on('error', err => {
             this.error(err);
