@@ -11,11 +11,11 @@
       outputs: {
         value: 1,
       },
-      migrate: {
+      /*migrate: {
         // migration versioning
         // flag for adding new defaults
         value: 0.000000002,
-      },
+      },*/
       cmdPath: {
         value: RED.settings.ffmpegSpawn.cmdPath,
         validate: function (cmdPath) {
@@ -44,12 +44,6 @@
           return ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(killSignal);
         },
       },
-      msgOutput: {
-        value: 'split',
-        validate: function (msgOutput) {
-          return ['split', 'combined'].includes(msgOutput);
-        },
-      },
     },
     paletteLabel: 'ffmpeg',
     icon: 'font-awesome/fa-file-video-o',
@@ -62,9 +56,6 @@
       return 'stdin';
     },
     outputLabels: function (index) {
-      if (this.msgOutput === 'combined') {
-        return 'output';
-      }
       switch (index) {
         case 0:
           return 'status';
@@ -122,22 +113,12 @@
         ],
       });
 
-      const msgOutput = $('#node-input-msgOutput').typedInput({
-        types: [
-          {
-            value: 'str',
-            icon: ['fa fa-envelope'],
-            options: ['split', 'combined'],
-          },
-        ],
-      });
-
       // migration code start
-      if (typeof this.migrate === 'undefined' || this.migrate < this._def.defaults.migrate.value) {
+      /*if (typeof this.migrate === 'undefined' || this.migrate < this._def.defaults.migrate.value) {
         this.migrate = this._def.defaults.migrate.value;
-        this.msgOutput = this._def.defaults.msgOutput.value;
-        msgOutput.typedInput('value', this.msgOutput);
-      }
+        //this.msgOutput = this._def.defaults.msgOutput.value;
+        //msgOutput.typedInput('value', this.msgOutput);
+      }*/
       // migration code end
 
       $('<button type="button" class="red-ui-button red-ui-button-small"><i class="fa fa-book"></i> help</button>')
@@ -148,8 +129,8 @@
     },
     oneditsave: function () {
       this.cmdOutputs = $('#node-input-cmdOutputs').spinner('value');
-      this.msgOutput = $('#node-input-msgOutput').typedInput('value');
-      this.outputs = this.msgOutput === 'combined' ? 1 : this.cmdOutputs + 1;
+
+      this.outputs = this.cmdOutputs + 1;
     },
     onpaletteadd: function () {
       // console.log('paletteadd', this);
@@ -196,17 +177,6 @@
     <div class="form-row">
       <label for="node-input-killSignal"><i class="fa fa-times"></i> Signal</label>
       <input id="node-input-killSignal" />
-    </div>
-  </fieldset>
-
-  <fieldset>
-    <legend>message options</legend>
-
-    <p class="form-tips">Split or combine the node's output messages.</p>
-
-    <div class="form-row">
-      <label for="node-input-msgOutput"><i class="fa fa-envelope"></i> Output</label>
-      <input id="node-input-msgOutput" />
     </div>
   </fieldset>
 </script>
