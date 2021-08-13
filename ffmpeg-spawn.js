@@ -24,8 +24,6 @@ module.exports = RED => {
 
         this.cmdOutputs = parseInt(config.cmdOutputs);
 
-        this.splitOutput = config.msgOutput !== 'combined';
-
         this.killSignal = ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(config.killSignal) ? config.killSignal : 'SIGTERM';
 
         FfmpegSpawnNode.validateCmdPath(this.cmdPath); // throws
@@ -61,11 +59,11 @@ module.exports = RED => {
       }
 
       if (typeof action === 'object') {
-        const { command, signal, path, args, env, outputs, topics } = action;
+        const { command, signal, path, args, env } = action;
 
         switch (command) {
           case 'start':
-            this.start(payload, path, args, env, outputs, topics, filename);
+            this.start(payload, path, args, env, filename);
 
             break;
 
@@ -77,7 +75,7 @@ module.exports = RED => {
           case 'restart':
             await this.stop(signal);
 
-            this.start(payload, path, args, env, outputs, topics, filename);
+            this.start(payload, path, args, env, filename);
 
             break;
 
@@ -103,52 +101,28 @@ module.exports = RED => {
       done();
     }
 
-    start(_payload, _cmdPath, _cmdArgs, _cmdEnv, _cmdOutputs, _topics, _filename) {
+    start(payload, cmdPath, cmdArgs, cmdEnv, outFilenames) {
       if (!this.running) {
         try {
-          let cmdPath;
-
-          if (typeof _cmdPath !== 'undefined') {
-            FfmpegSpawnNode.validateCmdPath(_cmdPath); // throws
-
-            cmdPath = _cmdPath;
+          if (typeof cmdPath !== 'undefined') {
+            FfmpegSpawnNode.validateCmdPath(cmdPath); // throws
           } else {
             cmdPath = this.cmdPath;
           }
 
-          let cmdArgs;
-
-          if (typeof _cmdArgs !== 'undefined') {
-            FfmpegSpawnNode.validateCmdArgs(_cmdArgs); // throws
-
-            cmdArgs = _cmdArgs;
+          if (typeof cmdArgs !== 'undefined') {
+            FfmpegSpawnNode.validateCmdArgs(cmdArgs); // throws
           } else {
             cmdArgs = this.cmdArgs;
           }
 
-          let cmdOutputs;
+          outFilenames = typeof outFilenames === 'string' ? [outFilenames] : Array.isArray(outFilenames) ? outFilenames : [];
 
-          if (!this.splitOutput && typeof _cmdOutputs !== 'undefined') {
-            FfmpegSpawnNode.validateCmdOutputs(_cmdOutputs); // throws
+          const topics = this.createTopics();
 
-            cmdOutputs = _cmdOutputs;
-          } else {
-            cmdOutputs = this.cmdOutputs;
-          }
+          const stdio = this.createStdio();
 
-          let topics;
-
-          if (!this.splitOutput && typeof _topics !== 'undefined') {
-            FfmpegSpawnNode.validateCmdTopics(_topics, cmdOutputs); // throws
-
-            topics = FfmpegSpawnNode.createTopicsFromArray(_topics);
-          } else {
-            topics = FfmpegSpawnNode.createTopicsFromCount(cmdOutputs);
-          }
-
-          const stdio = FfmpegSpawnNode.createStdio(cmdOutputs);
-
-          const env = typeof _cmdEnv === 'object' ? { ...process.env, ..._cmdEnv } : process.env;
+          const env = typeof cmdEnv === 'object' ? { ...process.env, ...cmdEnv } : process.env;
 
           this.ffmpeg = spawn(cmdPath, cmdArgs, { stdio, env });
 
@@ -205,29 +179,23 @@ module.exports = RED => {
               console.log(`${this.id}: ${err.toString()}`);
             });
 
-            if (Buffer.isBuffer(_payload)) {
-              this.ffmpeg.stdin.write(_payload);
+            if (Buffer.isBuffer(payload)) {
+              this.ffmpeg.stdin.write(payload);
             }
 
             for (let i = 1; i < stdio.length; ++i) {
               if (stdio[i] === 'pipe') {
                 const topic = topics[i];
 
-                const filename = i === 1 && typeof _filename === 'string' ? _filename : Array.isArray(_filename) ? _filename[i - 1] : undefined;
+                const filename = outFilenames[i - 1] || undefined;
 
-                if (this.splitOutput) {
-                  const wires = [];
+                const wires = [];
 
-                  this.ffmpeg.stdio[i].on('data', data => {
-                    wires[i] = { topic, payload: data, filename };
+                this.ffmpeg.stdio[i].on('data', data => {
+                  wires[i] = { topic, payload: data, filename };
 
-                    this.send(wires);
-                  });
-                } else {
-                  this.ffmpeg.stdio[i].on('data', data => {
-                    this.send({ topic, payload: data, filename });
-                  });
-                }
+                  this.send(wires);
+                });
               }
             }
           }
@@ -239,7 +207,7 @@ module.exports = RED => {
       }
     }
 
-    stop(_killSignal) {
+    stop(killSignal) {
       if (this.running && this.ffmpeg instanceof ChildProcess) {
         const { pid, exitCode, signalCode } = this.ffmpeg;
 
@@ -249,12 +217,14 @@ module.exports = RED => {
               resolve();
             });
 
-            const killSignal = ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(_killSignal) ? _killSignal : this.killSignal;
+            killSignal = ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(killSignal) ? killSignal : this.killSignal;
 
             if (this.ffmpeg.kill(0) && !this.ffmpeg.stdin.destroyed) {
               this.ffmpeg.stdin.destroy();
 
               this.ffmpeg.kill(killSignal);
+
+              // todo: kill again for stubborn ffmpeg process
             }
           });
         }
@@ -281,54 +251,42 @@ module.exports = RED => {
       }
     }
 
-    static validateCmdTopics(cmdTopics, cmdOutputs) {
-      if (!Array.isArray(cmdTopics) || [...new Set(cmdTopics)].length !== cmdOutputs || cmdTopics.includes('status') || cmdTopics.some(topic => typeof topic !== 'string')) {
-        throw new Error(_('ffmpeg-spawn.error.cmd_topics_invalid', { cmdTopics, cmdOutputs }));
-      }
-    }
+    createTopics() {
+      const base = `ffmpeg_spawn/${this.id}/`;
 
-    static createTopicsFromArray(array) {
-      const topics = ['status'];
+      const topics = [`${base}status`];
 
-      topics.push(...array);
-
-      return topics;
-    }
-
-    static createTopicsFromCount(count) {
-      const topics = ['status'];
-
-      switch (count) {
+      switch (this.cmdOutputs) {
         case 0:
           // do nothing
 
           break;
 
         case 1:
-          topics.push('stdout');
+          topics.push(`${base}stdout`);
 
           break;
 
         case 2:
-          topics.push(...['stdout', 'stderr']);
+          topics.push(...[`${base}stdout`, `${base}stderr`]);
 
           break;
 
         default:
-          topics.push(...['stdout', 'stderr']);
+          topics.push(...[`${base}stdout`, `${base}stderr`]);
 
-          for (let i = 3; i <= count; ++i) {
-            topics.push(`stdio${i}`);
+          for (let i = 3; i <= this.cmdOutputs; ++i) {
+            topics.push(`${base}stdio${i}`);
           }
       }
 
       return topics;
     }
 
-    static createStdio(cmdOutputs) {
+    createStdio() {
       const stdio = ['pipe'];
 
-      switch (cmdOutputs) {
+      switch (this.cmdOutputs) {
         case 0:
           stdio.push(...['ignore', 'ignore']);
 
@@ -340,7 +298,7 @@ module.exports = RED => {
           break;
 
         default:
-          for (let i = 0; i < cmdOutputs; ++i) {
+          for (let i = 0; i < this.cmdOutputs; ++i) {
             stdio.push('pipe');
           }
 
