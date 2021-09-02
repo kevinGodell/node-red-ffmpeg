@@ -93,7 +93,7 @@
         <dd>Path to the ffmpeg binary executable.</dd>
         <dt class="optional">args<span class="property-type">array</span></dt>
         <dd>example: ['-loglevel', 'trace', '-version']</dd>
-        <dd>Arguments passed to the ffmpeg process.</dd>
+        <dd>Array of arguments passed to the ffmpeg process.</dd>
         <dt class="optional">signal<span class="property-type">string</span></dt>
         <dd>accepts: 'SIGHUP' | 'SIGINT' | 'SIGKILL' | 'SIGTERM'</dd>
         <dd>Kill signal used when terminating the ffmpeg process.</dd>
@@ -189,7 +189,7 @@
         <li>
           <h5>Args</h5>
           <ul>
-            <li>arguments passed to the ffmpeg process</li>
+            <li>array of arguments passed to the ffmpeg process</li>
             <li>can be overridden via the input message</li>
           </ul>
         </li>
