@@ -1,6 +1,6 @@
 {
   "name": "node-red-contrib-ffmpeg-spawn",
-  "version": "0.1.0-beta.3",
+  "version": "0.1.0-beta.4",
   "description": "Spawn a long running ffmpeg process to handle video/image processing.",
   "main": "ffmpeg-spawn.js",
   "scripts": {
@@ -24,7 +24,7 @@
   "devDependencies": {
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-prettier": "^3.3.1",
+    "eslint-plugin-prettier": "^3.4.1",
     "prettier": "^2.3.2"
   },
   "dependencies": {},
