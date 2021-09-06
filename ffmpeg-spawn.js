@@ -124,9 +124,9 @@ module.exports = RED => {
 
           const env = typeof cmdEnv === 'object' ? { ...process.env, ...cmdEnv } : process.env;
 
-          this.ffmpeg = spawn(cmdPath, cmdArgs, { stdio, env });
+          const ffmpeg = spawn(cmdPath, cmdArgs, { stdio, env });
 
-          this.ffmpeg.on('error', err => {
+          ffmpeg.once('error', err => {
             this.error(err);
 
             const status = 'error';
@@ -138,10 +138,12 @@ module.exports = RED => {
             this.send({ topic: topics[0], payload: { status, error } });
           });
 
-          const { pid } = this.ffmpeg;
+          const { pid } = ffmpeg;
 
           if (pid) {
             this.running = true;
+
+            this.ffmpeg = ffmpeg;
 
             const message = `pid: ${pid}`;
 
@@ -151,16 +153,10 @@ module.exports = RED => {
 
             this.send({ topic: topics[0], payload: { status, pid } });
 
-            this.ffmpeg.once('close', (code, signal) => {
-              this.ffmpeg.stdin.removeAllListeners('error');
+            ffmpeg.once('close', async (code, signal) => {
+              this.running = false;
 
-              for (let i = 1; i < stdio.length; ++i) {
-                if (stdio[i] === 'pipe') {
-                  this.ffmpeg.stdio[i].removeAllListeners('data');
-                }
-              }
-
-              const { pid, killed } = this.ffmpeg;
+              const { pid, killed } = ffmpeg;
 
               const message = `code: ${code}, signal: ${signal}, killed: ${killed}`;
 
@@ -171,16 +167,20 @@ module.exports = RED => {
               this.send({ topic: topics[0], payload: { status, pid, code, signal, killed } });
 
               this.ffmpeg = undefined;
-
-              this.running = false;
             });
 
-            this.ffmpeg.stdin.on('error', err => {
-              console.log(`${this.id}: ${err.toString()}`);
+            const { stdin } = ffmpeg;
+
+            stdin.on('error', err => {
+              this.debug(err);
+            });
+
+            stdin.once('close', () => {
+              stdin.removeAllListeners('error');
             });
 
             if (Buffer.isBuffer(payload)) {
-              this.ffmpeg.stdin.write(payload);
+              stdin.write(payload);
             }
 
             for (let i = 1; i < stdio.length; ++i) {
@@ -191,10 +191,16 @@ module.exports = RED => {
 
                 const wires = [];
 
-                this.ffmpeg.stdio[i].on('data', data => {
+                const pipe = ffmpeg.stdio[i];
+
+                pipe.on('data', data => {
                   wires[i] = { topic, payload: data, filename };
 
                   this.send(wires);
+                });
+
+                pipe.once('close', () => {
+                  pipe.removeAllListeners('data');
                 });
               }
             }
@@ -209,23 +215,26 @@ module.exports = RED => {
 
     stop(killSignal) {
       if (this.running && this.ffmpeg instanceof ChildProcess) {
-        const { pid, exitCode, signalCode } = this.ffmpeg;
+        const {
+          ffmpeg,
+          ffmpeg: { stdin, pid, exitCode, signalCode, stdio },
+        } = this;
+
+        killSignal = ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(killSignal) ? killSignal : this.killSignal;
 
         if (typeof pid === 'number' && exitCode === null && signalCode === null) {
-          return new Promise((resolve, reject) => {
-            this.ffmpeg.once('close', (code, signal) => {
+          return new Promise(async (resolve, reject) => {
+            ffmpeg.once('close', (code, signal) => {
               resolve();
             });
 
-            killSignal = ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(killSignal) ? killSignal : this.killSignal;
+            stdin.once('close', async () => {
+              if (ffmpeg instanceof ChildProcess && ffmpeg.kill(0)) {
+                ffmpeg.kill(killSignal);
+              }
+            });
 
-            if (this.ffmpeg.kill(0) && !this.ffmpeg.stdin.destroyed) {
-              this.ffmpeg.stdin.destroy();
-
-              this.ffmpeg.kill(killSignal);
-
-              // todo: kill again for stubborn ffmpeg process
-            }
+            stdin.end();
           });
         }
       }
