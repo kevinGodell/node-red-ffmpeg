@@ -18,6 +18,8 @@ module.exports = RED => {
 
         this.running = false;
 
+        this.stopping = false;
+
         this.cmdPath = config.cmdPath.trim() || FfmpegSpawnNode.cmdPath;
 
         this.cmdArgs = config.cmdArgs ? FfmpegSpawnNode.jsonParse(config.cmdArgs) : ['-version'];
@@ -47,10 +49,20 @@ module.exports = RED => {
     async onInput(msg) {
       const { payload, action, filename } = msg;
 
+      if (this.stopping) {
+        this.debug('FFmpeg is stopping. Try again later');
+
+        return;
+      }
+
       // needs to be a priority case if being used
-      if (this.running && Buffer.isBuffer(payload)) {
+      if (Buffer.isBuffer(payload) && this.running) {
         if (payload.length) {
-          this.ffmpeg.stdin.write(payload);
+          try {
+            this.ffmpeg.stdin.write(payload);
+          } catch (err) {
+            this.debug(err);
+          }
         } else {
           await this.stop();
         }
@@ -92,7 +104,11 @@ module.exports = RED => {
 
       this.removeListener('close', this.onClose);
 
-      await this.stop('SIGKILL');
+      await this.onInput({ action: { command: 'stop' } });
+
+      // if (!this.stopping) {
+      // await this.stop();
+      // }
 
       const message = removed ? _('ffmpeg-spawn.info.removed') : _('ffmpeg-spawn.info.closed');
 
@@ -145,9 +161,9 @@ module.exports = RED => {
 
             this.ffmpeg = ffmpeg;
 
-            const message = `pid: ${pid}`;
-
             const status = 'spawn';
+
+            const message = `pid: ${pid}`;
 
             this.status({ fill: 'green', shape: 'dot', text: message });
 
@@ -158,9 +174,9 @@ module.exports = RED => {
 
               const { pid, killed } = ffmpeg;
 
-              const message = `code: ${code}, signal: ${signal}, killed: ${killed}`;
-
               const status = 'close';
+
+              const message = `code: ${code}, signal: ${signal}, killed: ${killed}`;
 
               this.status({ fill: 'red', shape: 'dot', text: message });
 
@@ -199,8 +215,14 @@ module.exports = RED => {
                   this.send(wires);
                 });
 
+                pipe.on('error', err => {
+                  this.debug(err);
+                });
+
                 pipe.once('close', () => {
                   pipe.removeAllListeners('data');
+
+                  pipe.removeAllListeners('error');
                 });
               }
             }
@@ -217,22 +239,36 @@ module.exports = RED => {
       if (this.running && this.ffmpeg instanceof ChildProcess) {
         const {
           ffmpeg,
-          ffmpeg: { stdin, pid, exitCode, signalCode, stdio },
+          ffmpeg: { stdin, pid, exitCode, signalCode },
         } = this;
 
         killSignal = ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(killSignal) ? killSignal : this.killSignal;
 
         if (typeof pid === 'number' && exitCode === null && signalCode === null) {
           return new Promise(async (resolve, reject) => {
-            ffmpeg.once('close', (code, signal) => {
+            const sigkillTimeout = setTimeout(() => {
+              this.debug(`sigkill timeout`);
+
+              if (ffmpeg instanceof ChildProcess && ffmpeg.kill(0)) {
+                ffmpeg.kill('SIGKILL');
+              }
+            }, 2000);
+
+            ffmpeg.once('close', () => {
+              clearTimeout(sigkillTimeout);
+
+              this.stopping = false;
+
               resolve();
             });
 
-            stdin.once('close', async () => {
+            stdin.once('close', () => {
               if (ffmpeg instanceof ChildProcess && ffmpeg.kill(0)) {
                 ffmpeg.kill(killSignal);
               }
             });
+
+            this.stopping = true;
 
             stdin.end();
           });
