@@ -362,17 +362,17 @@ module.exports = RED => {
     }
   }
 
-  if (typeof settings.ffmpegSpawn !== 'object') {
-    settings.ffmpegSpawn = {};
+  let ffmpegSpawn = settings.get('ffmpegSpawn');
+
+  if (typeof ffmpegSpawn !== 'object') {
+    ffmpegSpawn = {};
   }
 
-  const { ffmpegSpawn } = settings;
+  let { cmdPath, cmdOutputsMax } = ffmpegSpawn;
 
-  ffmpegSpawn.cmdPath = /ffmpeg/i.test(ffmpegSpawn.cmdPath) ? ffmpegSpawn.cmdPath.trim() : 'ffmpeg';
+  cmdPath = /ffmpeg/i.test(cmdPath) ? cmdPath.trim() : 'ffmpeg';
 
-  ffmpegSpawn.cmdOutputsMax = Number.isInteger(ffmpegSpawn.cmdOutputsMax) && ffmpegSpawn.cmdOutputsMax > 5 ? ffmpegSpawn.cmdOutputsMax : 5;
-
-  const { cmdPath, cmdOutputsMax } = ffmpegSpawn;
+  cmdOutputsMax = Number.isInteger(cmdOutputsMax) && cmdOutputsMax > 5 ? cmdOutputsMax : 5;
 
   FfmpegSpawnNode.cmdPath = cmdPath;
 
