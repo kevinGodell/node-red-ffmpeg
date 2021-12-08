@@ -4,6 +4,9 @@
     align: 'left',
     category: 'cctv',
     color: '#DEBD5C',
+    credentials: {
+      secret: { type: 'text' },
+    },
     defaults: {
       name: {
         value: '',
@@ -159,6 +162,13 @@
     <div class="form-row">
       <label for="node-input-cmdArgs"><i class="fa fa-gears"></i> Args</label>
       <input id="node-input-cmdArgs" />
+    </div>
+
+    <p class="form-tips">Args entry 'SECRET' will be substituted with this credential value.</p>
+
+    <div class="form-row">
+      <label for="node-input-secret"><i class="fa fa-user-secret"></i> Secret</label>
+      <input type="text" id="node-input-secret" />
     </div>
 
     <p class="form-tips">Number of stdio outputs attached to the ffmpeg process.</p>

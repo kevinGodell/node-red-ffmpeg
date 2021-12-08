@@ -14,6 +14,8 @@ module.exports = RED => {
       createNode(this, config);
 
       try {
+        const { secret } = this.credentials;
+
         this.ffmpeg = undefined;
 
         this.running = false;
@@ -33,6 +35,10 @@ module.exports = RED => {
         FfmpegSpawnNode.validateCmdArgs(this.cmdArgs); // throws
 
         FfmpegSpawnNode.validateCmdOutputs(this.cmdOutputs); // throws
+
+        if (secret && this.cmdArgs.includes('SECRET')) {
+          this.cmdArgs[this.cmdArgs.indexOf('SECRET')] = secret;
+        }
 
         this.on('input', this.onInput);
 
@@ -356,7 +362,7 @@ module.exports = RED => {
     static jsonParse(str) {
       try {
         return JSON.parse(str);
-      } catch (e) {
+      } catch (err) {
         return str;
       }
     }
@@ -380,7 +386,10 @@ module.exports = RED => {
 
   FfmpegSpawnNode.type = 'ffmpeg-spawn';
 
-  FfmpegSpawnNode.settings = {
+  FfmpegSpawnNode.config = {
+    credentials: {
+      secret: { type: 'text' },
+    },
     settings: {
       ffmpegSpawn: {
         value: {
@@ -392,5 +401,5 @@ module.exports = RED => {
     },
   };
 
-  registerType(FfmpegSpawnNode.type, FfmpegSpawnNode, FfmpegSpawnNode.settings);
+  registerType(FfmpegSpawnNode.type, FfmpegSpawnNode, FfmpegSpawnNode.config);
 };
