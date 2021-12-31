@@ -374,27 +374,32 @@ module.exports = RED => {
     ffmpegSpawn = {};
   }
 
-  let { cmdPath, cmdOutputsMax } = ffmpegSpawn;
+  let { cmdPath, cmdOutputsMax, secretType } = ffmpegSpawn;
 
   cmdPath = /ffmpeg/i.test(cmdPath) ? cmdPath.trim() : 'ffmpeg';
 
   cmdOutputsMax = Number.isInteger(cmdOutputsMax) && cmdOutputsMax > 5 ? cmdOutputsMax : 5;
 
+  secretType = ['password', 'text'].includes(secretType) ? secretType : 'text';
+
   FfmpegSpawnNode.cmdPath = cmdPath;
 
   FfmpegSpawnNode.cmdOutputsMax = cmdOutputsMax;
+
+  FfmpegSpawnNode.secretType = secretType;
 
   FfmpegSpawnNode.type = 'ffmpeg-spawn';
 
   FfmpegSpawnNode.config = {
     credentials: {
-      secret: { type: 'text' },
+      secret: { type: secretType },
     },
     settings: {
       ffmpegSpawn: {
         value: {
           cmdPath,
           cmdOutputsMax,
+          secretType,
         },
         exportable: true,
       },

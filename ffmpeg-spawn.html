@@ -5,7 +5,7 @@
     category: 'cctv',
     color: '#DEBD5C',
     credentials: {
-      secret: { type: 'text' },
+      secret: { type: RED.settings.ffmpegSpawn.secretType },
     },
     defaults: {
       name: {
@@ -115,6 +115,8 @@
           },
         ],
       });
+
+      const secret = $('#node-input-secret').typedInput({ types: ['cred'] });
 
       // migration code start
       /*if (typeof this.migrate === 'undefined' || this.migrate < this._def.defaults.migrate.value) {
