@@ -229,12 +229,21 @@
       <h4><code>cmdPath</code></h4>
       <ul>
         <li>default path to ffmpeg</li>
+        <li>defaults to: 'ffmpeg'</li>
       </ul>
     </li>
     <li>
       <h4><code>cmdOutputsMax</code></h4>
       <ul>
         <li>maximum stdio outputs</li>
+        <li>defaults to: 5</li>
+      </ul>
+    </li>
+    <li>
+      <h4><code>secretType</code></h4>
+      <ul>
+        <li>determines if secret is treated as text or password</li>
+        <li>defaults to: 'text'</li>
       </ul>
     </li>
   </ul>
@@ -243,7 +252,8 @@
 {
   ffmpegSpawn: {
     cmdPath: '/path/to/ffmpeg',
-    cmdOutputsMax: 6
+    cmdOutputsMax: 6,
+    secretType: 'text'
   }
 }
   </code></pre>
@@ -252,6 +262,7 @@
   ffmpegSpawn: {
     cmdPath: require('ffmpeg-for-homebridge'),
     cmdOutputsMax: 10
+    secretType: 'password'
   }
 }
   </code></pre>
