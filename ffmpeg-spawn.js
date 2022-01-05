@@ -368,19 +368,29 @@ module.exports = RED => {
     }
   }
 
-  let ffmpegSpawn = settings.get('ffmpegSpawn');
+  const [cmdPath, cmdOutputsMax, secretType] = (() => {
+    const { ffmpegSpawn } = settings;
 
-  if (typeof ffmpegSpawn !== 'object') {
-    ffmpegSpawn = {};
-  }
+    if (ffmpegSpawn instanceof Object) {
+      let { cmdPath, cmdOutputsMax, secretType } = ffmpegSpawn;
 
-  let { cmdPath, cmdOutputsMax, secretType } = ffmpegSpawn;
+      cmdPath = /ffmpeg/i.test(cmdPath) ? cmdPath.trim() : 'ffmpeg';
 
-  cmdPath = /ffmpeg/i.test(cmdPath) ? cmdPath.trim() : 'ffmpeg';
+      cmdOutputsMax = Number.isInteger(cmdOutputsMax) && cmdOutputsMax > 5 ? cmdOutputsMax : 5;
 
-  cmdOutputsMax = Number.isInteger(cmdOutputsMax) && cmdOutputsMax > 5 ? cmdOutputsMax : 5;
+      secretType = ['password', 'text'].includes(secretType) ? secretType : 'text';
 
-  secretType = ['password', 'text'].includes(secretType) ? secretType : 'text';
+      ffmpegSpawn.cmdPath = cmdPath;
+
+      ffmpegSpawn.cmdOutputsMax = cmdOutputsMax;
+
+      ffmpegSpawn.secretType = secretType;
+
+      return [cmdPath, cmdOutputsMax, secretType];
+    }
+
+    return ['ffmpeg', 5, 'text'];
+  })();
 
   FfmpegSpawnNode.cmdPath = cmdPath;
 

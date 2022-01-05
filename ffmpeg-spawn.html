@@ -1,4 +1,9 @@
 <script type="text/javascript">
+  (() => {
+    if (!(RED.settings.ffmpegSpawn instanceof Object)) {
+      RED.settings.ffmpegSpawn = { cmdPath: 'ffmpeg', cmdOutputsMax: 5, secretType: 'text' };
+    }
+  })();
   // register node
   RED.nodes.registerType('ffmpeg-spawn', {
     align: 'left',
