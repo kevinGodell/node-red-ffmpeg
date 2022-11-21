@@ -52,7 +52,13 @@ module.exports = RED => {
       }
     }
 
-    async onInput(msg) {
+    async onInput(msg, send, done) {
+      await this.handleMsg(msg);
+
+      done();
+    }
+
+    async handleMsg(msg) {
       const { payload, action, filename } = msg;
 
       if (this.stopping) {
@@ -110,11 +116,7 @@ module.exports = RED => {
 
       this.removeListener('close', this.onClose);
 
-      await this.onInput({ action: { command: 'stop' } });
-
-      // if (!this.stopping) {
-      // await this.stop();
-      // }
+      await this.handleMsg({ action: { command: 'stop' } });
 
       const message = removed ? _('ffmpeg-spawn.info.removed') : _('ffmpeg-spawn.info.closed');
 
