@@ -8,7 +8,8 @@
     "pack": "npm pack",
     "pretty": "prettier --write **/*.html",
     "lint": "eslint --fix --ext .js --ignore-path .gitignore .",
-    "clean": "npm run lint && npm run pretty"
+    "clean": "npm run lint && npm run pretty",
+    "beta": "npm version prerelease --preid=beta"
   },
   "repository": {
     "type": "git",
