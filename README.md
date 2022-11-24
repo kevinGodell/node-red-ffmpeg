@@ -32,7 +32,10 @@ node-red-stop && node-red-start
 * See the detailed help text in the sidebar.
 
 ### Screenshots:
-Coming soon...
+<img width="1330" alt="flow" src="https://user-images.githubusercontent.com/6091746/203855624-1ad8675b-e8e4-40d0-98db-79d765e84af6.png">
+<img width="497" alt="properties" src="https://user-images.githubusercontent.com/6091746/203855748-802673c7-663d-499c-bce0-5357ed61579a.png">
+<img width="474" alt="args" src="https://user-images.githubusercontent.com/6091746/203856008-f16f9a60-7512-4b4a-a532-65a1d4df9efc.png">
+<img width="547" alt="help" src="https://user-images.githubusercontent.com/6091746/203855844-f05959c3-76ed-47d4-a8ed-0283cba3e595.png">
 
 ### Flows:
-Coming soon...
+https://github.com/kevinGodell/node-red-ffmpeg/tree/master/examples
