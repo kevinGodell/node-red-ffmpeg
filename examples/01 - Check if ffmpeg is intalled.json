@@ -1,0 +1,674 @@
+[
+  {
+    "id": "6003aec5c30fdd75",
+    "type": "ffmpeg",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "outputs": 2,
+    "cmdPath": "",
+    "cmdArgs": "[\"-version\"]",
+    "cmdOutputs": 1,
+    "killSignal": "SIGTERM",
+    "x": 320,
+    "y": 640,
+    "wires": [
+      [],
+      [
+        "779e2c62c47eea6f"
+      ]
+    ]
+  },
+  {
+    "id": "30667271b195d4ee",
+    "type": "debug",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": true,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 700,
+    "y": 640,
+    "wires": []
+  },
+  {
+    "id": "cdd59148788fc94f",
+    "type": "inject",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "props": [
+      {
+        "p": "action",
+        "v": "{\"command\":\"start\"}",
+        "vt": "json"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 150,
+    "y": 640,
+    "wires": [
+      [
+        "6003aec5c30fdd75"
+      ]
+    ]
+  },
+  {
+    "id": "779e2c62c47eea6f",
+    "type": "function",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "func": "msg.payload = msg.payload.toString().split('\\n')[0];\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 500,
+    "y": 640,
+    "wires": [
+      [
+        "30667271b195d4ee"
+      ]
+    ]
+  },
+  {
+    "id": "5250be3201db5d69",
+    "type": "ffmpeg",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "outputs": 2,
+    "cmdPath": "",
+    "cmdArgs": "[]",
+    "cmdOutputs": 1,
+    "killSignal": "SIGTERM",
+    "x": 320,
+    "y": 800,
+    "wires": [
+      [],
+      [
+        "cc1329d8ed041e4b"
+      ]
+    ]
+  },
+  {
+    "id": "e8e054ce16520fa2",
+    "type": "debug",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": true,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 700,
+    "y": 800,
+    "wires": []
+  },
+  {
+    "id": "700f9e028971c929",
+    "type": "inject",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "props": [
+      {
+        "p": "action",
+        "v": "{\"command\":\"start\",\"args\":[\"-version\"]}",
+        "vt": "json"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 150,
+    "y": 800,
+    "wires": [
+      [
+        "5250be3201db5d69"
+      ]
+    ]
+  },
+  {
+    "id": "cc1329d8ed041e4b",
+    "type": "function",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "func": "msg.payload = msg.payload.toString().split('\\n')[0];\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 500,
+    "y": 800,
+    "wires": [
+      [
+        "e8e054ce16520fa2"
+      ]
+    ]
+  },
+  {
+    "id": "a872aab1aab7d80d",
+    "type": "comment",
+    "z": "6ce72abbdf28132b",
+    "name": "Output ffmpeg version by setting args.",
+    "info": "",
+    "x": 230,
+    "y": 580,
+    "wires": []
+  },
+  {
+    "id": "e465a5c35e0786d9",
+    "type": "comment",
+    "z": "6ce72abbdf28132b",
+    "name": "Output ffmpeg version by injecting args.",
+    "info": "",
+    "x": 230,
+    "y": 740,
+    "wires": []
+  },
+  {
+    "id": "9ae8a0f0a95eefe3",
+    "type": "ffmpeg",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "outputs": 3,
+    "cmdPath": "",
+    "cmdArgs": "[]",
+    "cmdOutputs": 2,
+    "killSignal": "SIGTERM",
+    "x": 320,
+    "y": 1280,
+    "wires": [
+      [],
+      [],
+      [
+        "7878403986d2b22d"
+      ]
+    ]
+  },
+  {
+    "id": "bba80ebc3f16df77",
+    "type": "debug",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": true,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 700,
+    "y": 1280,
+    "wires": []
+  },
+  {
+    "id": "7c9e544db30abf72",
+    "type": "inject",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "props": [
+      {
+        "p": "action",
+        "v": "{\"command\":\"start\",\"args\":[\"-hide_banner\",\"-bad_arg\"]}",
+        "vt": "json"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 150,
+    "y": 1280,
+    "wires": [
+      [
+        "9ae8a0f0a95eefe3"
+      ]
+    ]
+  },
+  {
+    "id": "54d415457b1bbb6f",
+    "type": "comment",
+    "z": "6ce72abbdf28132b",
+    "name": "Output ffmpeg error by injecting bad args.",
+    "info": "",
+    "x": 240,
+    "y": 1220,
+    "wires": []
+  },
+  {
+    "id": "7878403986d2b22d",
+    "type": "function",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "func": "msg.payload = msg.payload.toString();\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 500,
+    "y": 1280,
+    "wires": [
+      [
+        "bba80ebc3f16df77"
+      ]
+    ]
+  },
+  {
+    "id": "391757583541b551",
+    "type": "comment",
+    "z": "6ce72abbdf28132b",
+    "name": "FFMPEG IS NOT INCLUDED WITH THIS NODE. IT MUST BE INSTALLED SEPARATELY.",
+    "info": "",
+    "x": 380,
+    "y": 40,
+    "wires": []
+  },
+  {
+    "id": "fea07833bf049d7f",
+    "type": "comment",
+    "z": "6ce72abbdf28132b",
+    "name": "Trigger ENOENT error by setting bad path.",
+    "info": "",
+    "x": 240,
+    "y": 260,
+    "wires": []
+  },
+  {
+    "id": "5ab8cd9c64630dba",
+    "type": "inject",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "props": [
+      {
+        "p": "action",
+        "v": "{\"command\":\"start\"}",
+        "vt": "json"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 150,
+    "y": 320,
+    "wires": [
+      [
+        "c70910a7cc8b67f1"
+      ]
+    ]
+  },
+  {
+    "id": "c70910a7cc8b67f1",
+    "type": "ffmpeg",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "outputs": 2,
+    "cmdPath": "bad/path/to/ffmpeg",
+    "cmdArgs": "[\"-version\"]",
+    "cmdOutputs": 1,
+    "killSignal": "SIGTERM",
+    "x": 320,
+    "y": 320,
+    "wires": [
+      [],
+      [
+        "9f6b145b637b7ddc"
+      ]
+    ]
+  },
+  {
+    "id": "9f6b145b637b7ddc",
+    "type": "function",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "func": "msg.payload = msg.payload.toString().split('\\n')[0];\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 500,
+    "y": 320,
+    "wires": [
+      [
+        "1632cbb413f41e9e"
+      ]
+    ]
+  },
+  {
+    "id": "1632cbb413f41e9e",
+    "type": "debug",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": true,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 700,
+    "y": 320,
+    "wires": []
+  },
+  {
+    "id": "b5675cead39a47e8",
+    "type": "ffmpeg",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "outputs": 2,
+    "cmdPath": "",
+    "cmdArgs": "[]",
+    "cmdOutputs": 1,
+    "killSignal": "SIGTERM",
+    "x": 320,
+    "y": 960,
+    "wires": [
+      [],
+      [
+        "7409d57cc0f53d14"
+      ]
+    ]
+  },
+  {
+    "id": "a7deb3e64aa45bb1",
+    "type": "debug",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": true,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 700,
+    "y": 960,
+    "wires": []
+  },
+  {
+    "id": "a3aa67c6bbeba9be",
+    "type": "inject",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "props": [
+      {
+        "p": "action",
+        "v": "{\"command\":\"start\",\"path\":\"ffmpeg\",\"args\":[\"-version\"],\"signal\":\"SIGKILL\"}",
+        "vt": "json"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 150,
+    "y": 960,
+    "wires": [
+      [
+        "b5675cead39a47e8"
+      ]
+    ]
+  },
+  {
+    "id": "7409d57cc0f53d14",
+    "type": "function",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "func": "msg.payload = msg.payload.toString().split('\\n')[0];\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 500,
+    "y": 960,
+    "wires": [
+      [
+        "a7deb3e64aa45bb1"
+      ]
+    ]
+  },
+  {
+    "id": "4114fad2d106f16e",
+    "type": "comment",
+    "z": "6ce72abbdf28132b",
+    "name": "Output ffmpeg version by injecting path, args, and signal.",
+    "info": "",
+    "x": 290,
+    "y": 900,
+    "wires": []
+  },
+  {
+    "id": "af9fcc73d531275e",
+    "type": "ffmpeg",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "outputs": 2,
+    "cmdPath": "",
+    "cmdArgs": "[\"-version\"]",
+    "cmdOutputs": 1,
+    "killSignal": "SIGTERM",
+    "x": 320,
+    "y": 480,
+    "wires": [
+      [],
+      [
+        "fa8bcd9facaca9c2"
+      ]
+    ]
+  },
+  {
+    "id": "3a707e949e2ee414",
+    "type": "debug",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": true,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 700,
+    "y": 480,
+    "wires": []
+  },
+  {
+    "id": "9eb17ed9f728c75f",
+    "type": "inject",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "props": [
+      {
+        "p": "action",
+        "v": "{\"command\":\"start\",\"path\":\"bad/path/to/ffmpeg\"}",
+        "vt": "json"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 150,
+    "y": 480,
+    "wires": [
+      [
+        "af9fcc73d531275e"
+      ]
+    ]
+  },
+  {
+    "id": "fa8bcd9facaca9c2",
+    "type": "function",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "func": "msg.payload = msg.payload.toString().split('\\n')[0];\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 500,
+    "y": 480,
+    "wires": [
+      [
+        "3a707e949e2ee414"
+      ]
+    ]
+  },
+  {
+    "id": "d6f8ad6d021ceaca",
+    "type": "comment",
+    "z": "6ce72abbdf28132b",
+    "name": "Trigger ENOENT error by injecting bad path.",
+    "info": "",
+    "x": 250,
+    "y": 420,
+    "wires": []
+  },
+  {
+    "id": "740b832637dbb0ab",
+    "type": "comment",
+    "z": "6ce72abbdf28132b",
+    "name": "ENOENT error indicates that ffmpeg is not installed or its path is incorrect.",
+    "info": "",
+    "x": 340,
+    "y": 120,
+    "wires": []
+  },
+  {
+    "id": "74a1b34b1f1e86ca",
+    "type": "ffmpeg",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "outputs": 3,
+    "cmdPath": "",
+    "cmdArgs": "[\"-hide_banner\",\"-bad_arg\"]",
+    "cmdOutputs": 2,
+    "killSignal": "SIGTERM",
+    "x": 320,
+    "y": 1120,
+    "wires": [
+      [],
+      [],
+      [
+        "ca613107e8f1befd"
+      ]
+    ]
+  },
+  {
+    "id": "a84dc3cc63cbd1a1",
+    "type": "debug",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "active": true,
+    "tosidebar": true,
+    "console": true,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 700,
+    "y": 1120,
+    "wires": []
+  },
+  {
+    "id": "36b78d378a82372a",
+    "type": "inject",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "props": [
+      {
+        "p": "action",
+        "v": "{\"command\":\"start\"}",
+        "vt": "json"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "x": 150,
+    "y": 1120,
+    "wires": [
+      [
+        "74a1b34b1f1e86ca"
+      ]
+    ]
+  },
+  {
+    "id": "7d93d475fd63767f",
+    "type": "comment",
+    "z": "6ce72abbdf28132b",
+    "name": "Output ffmpeg error by setting bad args.",
+    "info": "",
+    "x": 240,
+    "y": 1060,
+    "wires": []
+  },
+  {
+    "id": "ca613107e8f1befd",
+    "type": "function",
+    "z": "6ce72abbdf28132b",
+    "name": "",
+    "func": "msg.payload = msg.payload.toString();\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 500,
+    "y": 1120,
+    "wires": [
+      [
+        "a84dc3cc63cbd1a1"
+      ]
+    ]
+  },
+  {
+    "id": "fc74f48844cdc34e",
+    "type": "comment",
+    "z": "6ce72abbdf28132b",
+    "name": "Settings for path, args, and signal can be individually overridden by injecting them.",
+    "info": "",
+    "x": 360,
+    "y": 80,
+    "wires": []
+  },
+  {
+    "id": "49f0c36022562abc",
+    "type": "comment",
+    "z": "6ce72abbdf28132b",
+    "name": "For help, tag me in the Node-RED forum @kevinGodell.",
+    "info": "`@kevinGodell`",
+    "x": 280,
+    "y": 160,
+    "wires": []
+  }
+]
