@@ -1,4 +1,4 @@
-<script data-help-name="ffmpeg-spawn" type="text/html">
+<script data-help-name="ffmpeg" type="text/html">
   <p>Spawn a long running <a href="https://ffmpeg.org/">ffmpeg</a> process to handle video/image processing.</p>
   <ul>
     <li>designed to be a thin wrapper around ffmpeg using <a href="https://nodejs.org/api/child_process.html#child_process_child_process_spawn_command_args_options">child_process.spawn</a></li>
@@ -106,14 +106,14 @@
     <li>
       <h4>Status</h4>
       <ul>
-        <li>topic will be 'ffmpeg_spawn/&lt;node.id&gt;/status'</li>
+        <li>topic will be 'ffmpeg/&lt;node.id&gt;/status'</li>
         <li>payload will have property status: 'spawn' | 'close' | 'error'</li>
         <li>additional payload properties: pid, code, signal, killed, error</li>
         <li>
           sends an output <code>msg</code> structured as:
           <pre class="form-tips" style="min-width: 450px"><code>
 {
-  topic: 'ffmpeg_spawn/&lt;node.id&gt;/status',
+  topic: 'ffmpeg/&lt;node.id&gt;/status',
   payload: {
     status: 'spawn',
     pid: 12345
@@ -122,7 +122,7 @@
           </code></pre>
           <pre class="form-tips" style="min-width: 450px"><code>
 {
-  topic: 'ffmpeg_spawn/&lt;node.id&gt;/status',
+  topic: 'ffmpeg/&lt;node.id&gt;/status',
   payload: {
     status: 'close',
     pid: 12345,
@@ -134,7 +134,7 @@
           </code></pre>
           <pre class="form-tips" style="min-width: 450px"><code>
 {
-  topic: 'ffmpeg_spawn/&lt;node.id&gt;/status',
+  topic: 'ffmpeg/&lt;node.id&gt;/status',
   payload: {
     status: 'error',
     error: 'Error: spawn ffmpeg ENOENT'
@@ -152,19 +152,19 @@
           sends an output <code>msg</code> structured as:
           <pre class="form-tips" style="min-width: 450px"><code>
 {
-  topic: 'ffmpeg_spawn/&lt;node.id&gt;/stdout',
+  topic: 'ffmpeg/&lt;node.id&gt;/stdout',
   payload: &lt;Buffer&gt;
 }
           </code></pre>
           <pre class="form-tips" style="min-width: 450px"><code>
 {
-  topic: 'ffmpeg_spawn/&lt;node.id&gt;/stderr',
+  topic: 'ffmpeg/&lt;node.id&gt;/stderr',
   payload: &lt;Buffer&gt;
 }
           </code></pre>
           <pre class="form-tips" style="min-width: 450px"><code>
 {
-  topic: 'ffmpeg_spawn/&lt;node.id&gt;/stdio3',
+  topic: 'ffmpeg/&lt;node.id&gt;/stdio3',
   payload: &lt;Buffer&gt;
 }
           </code></pre>
@@ -250,7 +250,7 @@
   <p style="margin-left: 15px">Configured in <a href="https://nodered.org/docs/user-guide/runtime/settings-file">settings.js</a></p>
   <pre class="form-tips" style="min-width: 450px; margin-left: 15px"><code>
 {
-  ffmpegSpawn: {
+  ffmpeg: {
     cmdPath: '/path/to/ffmpeg',
     cmdOutputsMax: 6,
     secretType: 'text'
@@ -259,7 +259,7 @@
   </code></pre>
   <pre class="form-tips" style="min-width: 450px; margin-left: 15px"><code>
 {
-  ffmpegSpawn: {
+  ffmpeg: {
     cmdPath: require('ffmpeg-for-homebridge'),
     cmdOutputsMax: 10
     secretType: 'password'

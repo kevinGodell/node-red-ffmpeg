@@ -1,4 +1,4 @@
-# node-red-contrib-ffmpeg-spawn
+# @kevingodell/node-red-ffmpeg
 
 **A [Node-RED](https://nodered.org/) node used for spawning a long-running [ffmpeg](https://ffmpeg.org/) process to handle video/image processing.**
 
@@ -17,11 +17,11 @@ cd ~/.node-red
 ```
 * using npm
 ```
-npm install node-red-contrib-ffmpeg-spawn
+npm install @kevingodell/node-red-ffmpeg
 ```
 * using yarn
 ```
-yarn add node-red-contrib-ffmpeg-spawn
+yarn add @kevingodell/node-red-ffmpeg
 ```
 * reboot the node-red server
 ```
@@ -29,19 +29,10 @@ node-red-stop && node-red-start
 ```
 
 ### Instructions:
-* See the detailed help text in the side bar.
+* See the detailed help text in the sidebar.
 
 ### Screenshots:
-
-![help1.png](https://raw.githubusercontent.com/kevinGodell/node-red-contrib-ffmpeg-spawn/main/screenshots//help1.png)
-
-![editor1.gif](https://raw.githubusercontent.com/kevinGodell/node-red-contrib-ffmpeg-spawn/main/screenshots/editor1.gif)
-
-![editor1.png](https://raw.githubusercontent.com/kevinGodell/node-red-contrib-ffmpeg-spawn/main/screenshots/editor1.png)
-
-![editor2.png](https://raw.githubusercontent.com/kevinGodell/node-red-contrib-ffmpeg-spawn/main/screenshots/editor2.png)
-
-![settings1.png](https://raw.githubusercontent.com/kevinGodell/node-red-contrib-ffmpeg-spawn/main/screenshots/settings1.png)
+Coming soon...
 
 ### Flows:
 Coming soon...

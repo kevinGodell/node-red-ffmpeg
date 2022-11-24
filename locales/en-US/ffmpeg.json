@@ -1,5 +1,5 @@
 {
-  "ffmpeg-spawn": {
+  "ffmpeg": {
     "label": {},
     "info": {
       "ready": "ready",

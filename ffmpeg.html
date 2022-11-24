@@ -1,16 +1,16 @@
 <script type="text/javascript">
   (() => {
-    if (!(RED.settings.ffmpegSpawn instanceof Object)) {
-      RED.settings.ffmpegSpawn = { cmdPath: 'ffmpeg', cmdOutputsMax: 5, secretType: 'text' };
+    if (!(RED.settings.ffmpeg instanceof Object)) {
+      RED.settings.ffmpeg = { cmdPath: 'ffmpeg', cmdOutputsMax: 5, secretType: 'text' };
     }
   })();
   // register node
-  RED.nodes.registerType('ffmpeg-spawn', {
+  RED.nodes.registerType('ffmpeg', {
     align: 'left',
     category: 'cctv',
     color: '#DEBD5C',
     credentials: {
-      secret: { type: RED.settings.ffmpegSpawn.secretType },
+      secret: { type: RED.settings.ffmpeg.secretType },
     },
     defaults: {
       name: {
@@ -25,7 +25,7 @@
         value: 0.000000002,
       },*/
       cmdPath: {
-        value: RED.settings.ffmpegSpawn.cmdPath,
+        value: RED.settings.ffmpeg.cmdPath,
         validate: function (cmdPath) {
           return cmdPath === '' || /^\s*$|ffmpeg/i.test(cmdPath);
         },
@@ -43,7 +43,7 @@
       cmdOutputs: {
         value: 0,
         validate: function (cmdOutputs) {
-          return cmdOutputs >= 0 && cmdOutputs <= RED.settings.ffmpegSpawn.cmdOutputsMax;
+          return cmdOutputs >= 0 && cmdOutputs <= RED.settings.ffmpeg.cmdOutputsMax;
         },
       },
       killSignal: {
@@ -76,7 +76,7 @@
       }
     },
     oneditprepare: function () {
-      const cmdPathPlaceholder = RED.settings.ffmpegSpawn.cmdPath;
+      const cmdPathPlaceholder = RED.settings.ffmpeg.cmdPath;
       const cmdPath = $('#node-input-cmdPath')
         .prop('placeholder', cmdPathPlaceholder)
         .prop('title', this.cmdPath || cmdPathPlaceholder)
@@ -95,7 +95,7 @@
         });
 
       const cmdOutputsMin = 0;
-      const cmdOutputsMax = RED.settings.ffmpegSpawn.cmdOutputsMax;
+      const cmdOutputsMax = RED.settings.ffmpeg.cmdOutputsMax;
       const cmdOutputs = $('#node-input-cmdOutputs').spinner({
         min: cmdOutputsMin,
         max: cmdOutputsMax,
@@ -148,7 +148,7 @@
   });
 </script>
 
-<script data-template-name="ffmpeg-spawn" type="text/html">
+<script data-template-name="ffmpeg" type="text/html">
   <div class="form-row">
     <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
     <input type="text" id="node-input-name" placeholder="Name" />

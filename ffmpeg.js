@@ -9,7 +9,7 @@ module.exports = RED => {
     nodes: { createNode, registerType },
   } = RED;
 
-  class FfmpegSpawnNode {
+  class FfmpegNode {
     constructor(config) {
       createNode(this, config);
 
@@ -22,19 +22,19 @@ module.exports = RED => {
 
         this.stopping = false;
 
-        this.cmdPath = config.cmdPath.trim() || FfmpegSpawnNode.cmdPath;
+        this.cmdPath = config.cmdPath.trim() || FfmpegNode.cmdPath;
 
-        this.cmdArgs = config.cmdArgs ? FfmpegSpawnNode.jsonParse(config.cmdArgs) : ['-version'];
+        this.cmdArgs = config.cmdArgs ? FfmpegNode.jsonParse(config.cmdArgs) : ['-version'];
 
         this.cmdOutputs = parseInt(config.cmdOutputs);
 
         this.killSignal = ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(config.killSignal) ? config.killSignal : 'SIGTERM';
 
-        FfmpegSpawnNode.validateCmdPath(this.cmdPath); // throws
+        FfmpegNode.validateCmdPath(this.cmdPath); // throws
 
-        FfmpegSpawnNode.validateCmdArgs(this.cmdArgs); // throws
+        FfmpegNode.validateCmdArgs(this.cmdArgs); // throws
 
-        FfmpegSpawnNode.validateCmdOutputs(this.cmdOutputs); // throws
+        FfmpegNode.validateCmdOutputs(this.cmdOutputs); // throws
 
         if (secret && this.cmdArgs.includes('SECRET')) {
           this.cmdArgs[this.cmdArgs.indexOf('SECRET')] = secret;
@@ -44,7 +44,7 @@ module.exports = RED => {
 
         this.on('close', this.onClose);
 
-        this.status({ fill: 'green', shape: 'ring', text: _('ffmpeg-spawn.info.ready') });
+        this.status({ fill: 'green', shape: 'ring', text: _('ffmpeg.info.ready') });
       } catch (err) {
         this.error(err);
 
@@ -118,7 +118,7 @@ module.exports = RED => {
 
       await this.handleMsg({ action: { command: 'stop' } });
 
-      const message = removed ? _('ffmpeg-spawn.info.removed') : _('ffmpeg-spawn.info.closed');
+      const message = removed ? _('ffmpeg.info.removed') : _('ffmpeg.info.closed');
 
       this.status({ fill: 'grey', shape: 'ring', text: message });
 
@@ -129,13 +129,13 @@ module.exports = RED => {
       if (!this.running) {
         try {
           if (typeof cmdPath !== 'undefined') {
-            FfmpegSpawnNode.validateCmdPath(cmdPath); // throws
+            FfmpegNode.validateCmdPath(cmdPath); // throws
           } else {
             cmdPath = this.cmdPath;
           }
 
           if (typeof cmdArgs !== 'undefined') {
-            FfmpegSpawnNode.validateCmdArgs(cmdArgs); // throws
+            FfmpegNode.validateCmdArgs(cmdArgs); // throws
           } else {
             cmdArgs = this.cmdArgs;
           }
@@ -177,7 +177,7 @@ module.exports = RED => {
 
             this.send({ topic: topics[0], payload: { status, pid } });
 
-            ffmpeg.once('close', async (code, signal) => {
+            ffmpeg.once('close', (code, signal) => {
               this.running = false;
 
               const { pid, killed } = ffmpeg;
@@ -253,7 +253,7 @@ module.exports = RED => {
         killSignal = ['SIGHUP', 'SIGINT', 'SIGKILL', 'SIGTERM'].includes(killSignal) ? killSignal : this.killSignal;
 
         if (typeof pid === 'number' && exitCode === null && signalCode === null) {
-          return new Promise(async (resolve, reject) => {
+          return new Promise((resolve, reject) => {
             const sigkillTimeout = setTimeout(() => {
               this.debug(`sigkill timeout`);
 
@@ -288,24 +288,24 @@ module.exports = RED => {
 
     static validateCmdPath(cmdPath) {
       if (!/ffmpeg/i.test(cmdPath)) {
-        throw new Error(_('ffmpeg-spawn.error.cmd_path_invalid', { cmdPath }));
+        throw new Error(_('ffmpeg.error.cmd_path_invalid', { cmdPath }));
       }
     }
 
     static validateCmdArgs(cmdArgs) {
       if (!Array.isArray(cmdArgs)) {
-        throw new Error(_('ffmpeg-spawn.error.cmd_args_invalid', { cmdArgs }));
+        throw new Error(_('ffmpeg.error.cmd_args_invalid', { cmdArgs }));
       }
     }
 
     static validateCmdOutputs(cmdOutputs) {
       if (!Number.isInteger(cmdOutputs) || cmdOutputs < 0 || cmdOutputs > cmdOutputsMax) {
-        throw new Error(_('ffmpeg-spawn.error.cmd_outputs_invalid', { cmdOutputs }));
+        throw new Error(_('ffmpeg.error.cmd_outputs_invalid', { cmdOutputs }));
       }
     }
 
     createTopics() {
-      const base = `ffmpeg_spawn/${this.id}/`;
+      const base = `ffmpeg/${this.id}/`;
 
       const topics = [`${base}status`];
 
@@ -371,39 +371,39 @@ module.exports = RED => {
   }
 
   const { cmdPath, cmdOutputsMax, secretType } = (() => {
-    const { ffmpegSpawn } = settings;
+    const ffmpegSettings = settings.get('ffmpeg');
 
     const defaults = { cmdPath: 'ffmpeg', cmdOutputsMax: 5, secretType: 'text' };
 
-    if (ffmpegSpawn instanceof Object) {
-      let { cmdPath, cmdOutputsMax, secretType } = ffmpegSpawn;
+    if (ffmpegSettings instanceof Object) {
+      let { cmdPath, cmdOutputsMax, secretType } = ffmpegSettings;
 
-      ffmpegSpawn.cmdPath = /ffmpeg/i.test(cmdPath) ? cmdPath.trim() : defaults.cmdPath;
+      ffmpegSettings.cmdPath = /ffmpeg/i.test(cmdPath) ? cmdPath.trim() : defaults.cmdPath;
 
-      ffmpegSpawn.cmdOutputsMax = Number.isInteger(cmdOutputsMax) && cmdOutputsMax > 5 ? cmdOutputsMax : defaults.cmdOutputsMax;
+      ffmpegSettings.cmdOutputsMax = Number.isInteger(cmdOutputsMax) && cmdOutputsMax > 5 ? cmdOutputsMax : defaults.cmdOutputsMax;
 
-      ffmpegSpawn.secretType = ['password', 'text'].includes(secretType) ? secretType : defaults.secretType;
+      ffmpegSettings.secretType = ['password', 'text'].includes(secretType) ? secretType : defaults.secretType;
 
-      return ffmpegSpawn;
+      return ffmpegSettings;
     }
 
     return defaults;
   })();
 
-  FfmpegSpawnNode.cmdPath = cmdPath;
+  FfmpegNode.cmdPath = cmdPath;
 
-  FfmpegSpawnNode.cmdOutputsMax = cmdOutputsMax;
+  FfmpegNode.cmdOutputsMax = cmdOutputsMax;
 
-  FfmpegSpawnNode.secretType = secretType;
+  FfmpegNode.secretType = secretType;
 
-  FfmpegSpawnNode.type = 'ffmpeg-spawn';
+  FfmpegNode.type = 'ffmpeg';
 
-  FfmpegSpawnNode.config = {
+  FfmpegNode.config = {
     credentials: {
       secret: { type: secretType },
     },
     settings: {
-      ffmpegSpawn: {
+      ffmpeg: {
         value: {
           cmdPath,
           cmdOutputsMax,
@@ -414,5 +414,5 @@ module.exports = RED => {
     },
   };
 
-  registerType(FfmpegSpawnNode.type, FfmpegSpawnNode, FfmpegSpawnNode.config);
+  registerType(FfmpegNode.type, FfmpegNode, FfmpegNode.config);
 };
