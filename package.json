@@ -15,7 +15,10 @@
     "type": "git",
     "url": "git+https://github.com/kevinGodell/node-red-ffmpeg.git"
   },
-  "keywords": [],
+  "keywords": [
+    "node-red",
+    "ffmpeg"
+  ],
   "author": "Kevin Godell <kevin.godell@gmail.com> (https://github.com/kevinGodell)",
   "license": "MIT",
   "bugs": {
