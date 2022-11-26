@@ -1,6 +1,6 @@
 {
   "name": "@kevingodell/node-red-ffmpeg",
-  "version": "0.1.1-beta.0",
+  "version": "0.1.1-beta.1",
   "description": "Spawn a long running ffmpeg process to handle video/image processing.",
   "main": "ffmpeg.js",
   "scripts": {
