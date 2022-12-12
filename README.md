@@ -1,4 +1,8 @@
 # @kevingodell/node-red-ffmpeg
+######
+[![GitHub license](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://raw.githubusercontent.com/kevinGodell/node-red-ffmpeg/master/LICENSE)
+[![npm](https://img.shields.io/npm/dt/@kevingodell/node-red-ffmpeg.svg?style=flat-square)](https://www.npmjs.com/package/@kevingodell/node-red-ffmpeg)
+[![GitHub issues](https://img.shields.io/github/issues/kevinGodell/node-red-ffmpeg.svg)](https://github.com/kevinGodell/node-red-ffmpeg/issues)
 
 **A [Node-RED](https://nodered.org/) node used for spawning a long-running [ffmpeg](https://ffmpeg.org/) process to handle video/image processing.**
 
@@ -8,7 +12,7 @@
 ### Expectations:
 * You should have working knowledge of ffmpeg on the command line.
 * If you have difficulties making it work, please open a new [discussion](https://discourse.nodered.org/) and tag me `@kevinGodell`.
-* Please, do not send private messages asking for help because that will not benefit others with similar issues.
+* Do not send private messages asking for help because that will not benefit others with similar issues.
 
 ### Installation:
 * go to the correct directory, usually ~/.node-red
@@ -18,10 +22,6 @@ cd ~/.node-red
 * using npm
 ```
 npm install @kevingodell/node-red-ffmpeg
-```
-* using yarn
-```
-yarn add @kevingodell/node-red-ffmpeg
 ```
 * reboot the node-red server
 ```
