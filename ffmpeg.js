@@ -4,10 +4,28 @@ const { spawn, ChildProcess } = require('child_process');
 
 module.exports = RED => {
   const {
-    settings,
+    settings: { ffmpeg: ffmpegSettings },
     _,
     nodes: { createNode, registerType },
   } = RED;
+
+  const FFMPEG = (() => {
+    const defaults = { cmdPath: 'ffmpeg', cmdOutputsMax: 5, secretType: 'text' };
+
+    if (ffmpegSettings instanceof Object) {
+      const { cmdPath, cmdOutputsMax, secretType } = ffmpegSettings;
+
+      ffmpegSettings.cmdPath = /ffmpeg/i.test(cmdPath) ? cmdPath.trim() : defaults.cmdPath;
+
+      ffmpegSettings.cmdOutputsMax = Number.isInteger(cmdOutputsMax) && cmdOutputsMax > 5 ? cmdOutputsMax : defaults.cmdOutputsMax;
+
+      ffmpegSettings.secretType = ['password', 'text'].includes(secretType) ? secretType : defaults.secretType;
+
+      return ffmpegSettings;
+    }
+
+    return defaults;
+  })();
 
   class FfmpegNode {
     constructor(config) {
@@ -286,24 +304,6 @@ module.exports = RED => {
       return Promise.resolve();
     }
 
-    static validateCmdPath(cmdPath) {
-      if (!/ffmpeg/i.test(cmdPath)) {
-        throw new Error(_('ffmpeg.error.cmd_path_invalid', { cmdPath }));
-      }
-    }
-
-    static validateCmdArgs(cmdArgs) {
-      if (!Array.isArray(cmdArgs)) {
-        throw new Error(_('ffmpeg.error.cmd_args_invalid', { cmdArgs }));
-      }
-    }
-
-    static validateCmdOutputs(cmdOutputs) {
-      if (!Number.isInteger(cmdOutputs) || cmdOutputs < 0 || cmdOutputs > cmdOutputsMax) {
-        throw new Error(_('ffmpeg.error.cmd_outputs_invalid', { cmdOutputs }));
-      }
-    }
-
     createTopics() {
       const base = `ffmpeg/${this.id}/`;
 
@@ -361,6 +361,24 @@ module.exports = RED => {
       return stdio;
     }
 
+    static validateCmdPath(cmdPath) {
+      if (!/ffmpeg/i.test(cmdPath)) {
+        throw new Error(_('ffmpeg.error.cmd_path_invalid', { cmdPath }));
+      }
+    }
+
+    static validateCmdArgs(cmdArgs) {
+      if (!Array.isArray(cmdArgs)) {
+        throw new Error(_('ffmpeg.error.cmd_args_invalid', { cmdArgs }));
+      }
+    }
+
+    static validateCmdOutputs(cmdOutputs) {
+      if (!Number.isInteger(cmdOutputs) || cmdOutputs < 0 || cmdOutputs > FfmpegNode.cmdOutputsMax) {
+        throw new Error(_('ffmpeg.error.cmd_outputs_invalid', { cmdOutputs }));
+      }
+    }
+
     static jsonParse(str) {
       try {
         return JSON.parse(str);
@@ -370,45 +388,21 @@ module.exports = RED => {
     }
   }
 
-  const { cmdPath, cmdOutputsMax, secretType } = (() => {
-    const ffmpegSettings = settings.get('ffmpeg');
+  FfmpegNode.cmdPath = FFMPEG.cmdPath;
 
-    const defaults = { cmdPath: 'ffmpeg', cmdOutputsMax: 5, secretType: 'text' };
+  FfmpegNode.cmdOutputsMax = FFMPEG.cmdOutputsMax;
 
-    if (ffmpegSettings instanceof Object) {
-      let { cmdPath, cmdOutputsMax, secretType } = ffmpegSettings;
-
-      ffmpegSettings.cmdPath = /ffmpeg/i.test(cmdPath) ? cmdPath.trim() : defaults.cmdPath;
-
-      ffmpegSettings.cmdOutputsMax = Number.isInteger(cmdOutputsMax) && cmdOutputsMax > 5 ? cmdOutputsMax : defaults.cmdOutputsMax;
-
-      ffmpegSettings.secretType = ['password', 'text'].includes(secretType) ? secretType : defaults.secretType;
-
-      return ffmpegSettings;
-    }
-
-    return defaults;
-  })();
-
-  FfmpegNode.cmdPath = cmdPath;
-
-  FfmpegNode.cmdOutputsMax = cmdOutputsMax;
-
-  FfmpegNode.secretType = secretType;
+  FfmpegNode.secretType = FFMPEG.secretType;
 
   FfmpegNode.type = 'ffmpeg';
 
   FfmpegNode.config = {
     credentials: {
-      secret: { type: secretType },
+      secret: { type: FFMPEG.secretType },
     },
     settings: {
       ffmpeg: {
-        value: {
-          cmdPath,
-          cmdOutputsMax,
-          secretType,
-        },
+        value: FFMPEG,
         exportable: true,
       },
     },

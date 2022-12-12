@@ -1,16 +1,31 @@
 <script type="text/javascript">
-  (() => {
-    if (!(RED.settings.ffmpeg instanceof Object)) {
-      RED.settings.ffmpeg = { cmdPath: 'ffmpeg', cmdOutputsMax: 5, secretType: 'text' };
+  const FFMPEG = (() => {
+    const defaults = { cmdPath: 'ffmpeg', cmdOutputsMax: 5, secretType: 'text' };
+
+    const { ffmpeg: ffmpegSettings } = RED.settings;
+
+    if (ffmpegSettings instanceof Object) {
+      const { cmdPath, cmdOutputsMax, secretType } = ffmpegSettings;
+
+      ffmpegSettings.cmdPath = /ffmpeg/i.test(cmdPath) ? cmdPath.trim() : defaults.cmdPath;
+
+      ffmpegSettings.cmdOutputsMax = Number.isInteger(cmdOutputsMax) && cmdOutputsMax > 5 ? cmdOutputsMax : defaults.cmdOutputsMax;
+
+      ffmpegSettings.secretType = ['password', 'text'].includes(secretType) ? secretType : defaults.secretType;
+
+      return ffmpegSettings;
     }
+
+    return defaults;
   })();
+
   // register node
   RED.nodes.registerType('ffmpeg', {
     align: 'left',
     category: 'cctv',
     color: '#DEBD5C',
     credentials: {
-      secret: { type: RED.settings.ffmpeg.secretType },
+      secret: { type: FFMPEG.secretType },
     },
     defaults: {
       name: {
@@ -19,13 +34,8 @@
       outputs: {
         value: 1,
       },
-      /*migrate: {
-        // migration versioning
-        // flag for adding new defaults
-        value: 0.000000002,
-      },*/
       cmdPath: {
-        value: RED.settings.ffmpeg.cmdPath,
+        value: FFMPEG.cmdPath,
         validate: function (cmdPath) {
           return cmdPath === '' || /^\s*$|ffmpeg/i.test(cmdPath);
         },
@@ -43,7 +53,7 @@
       cmdOutputs: {
         value: 0,
         validate: function (cmdOutputs) {
-          return cmdOutputs >= 0 && cmdOutputs <= RED.settings.ffmpeg.cmdOutputsMax;
+          return cmdOutputs >= 0 && cmdOutputs <= FFMPEG.cmdOutputsMax;
         },
       },
       killSignal: {
@@ -76,12 +86,14 @@
       }
     },
     oneditprepare: function () {
-      const cmdPathPlaceholder = RED.settings.ffmpeg.cmdPath;
+      const cmdPathPlaceholder = FFMPEG.cmdPath;
+
       const cmdPath = $('#node-input-cmdPath')
         .prop('placeholder', cmdPathPlaceholder)
         .prop('title', this.cmdPath || cmdPathPlaceholder)
         .on('input', function () {
           this.value = this.value.trim();
+
           this.title = this.value || cmdPathPlaceholder;
         });
 
@@ -89,13 +101,16 @@
         .typedInput({ types: ['json'] })
         .on('change', function (event, type, value) {
           const val = $(this).typedInput('value').trim();
+
           if (val === '') {
             $(this).typedInput('value', '[]');
           }
         });
 
       const cmdOutputsMin = 0;
-      const cmdOutputsMax = RED.settings.ffmpeg.cmdOutputsMax;
+
+      const cmdOutputsMax = FFMPEG.cmdOutputsMax;
+
       const cmdOutputs = $('#node-input-cmdOutputs').spinner({
         min: cmdOutputsMin,
         max: cmdOutputsMax,
@@ -123,14 +138,6 @@
 
       const secret = $('#node-input-secret').typedInput({ types: ['cred'] });
 
-      // migration code start
-      /*if (typeof this.migrate === 'undefined' || this.migrate < this._def.defaults.migrate.value) {
-        this.migrate = this._def.defaults.migrate.value;
-        //this.msgOutput = this._def.defaults.msgOutput.value;
-        //msgOutput.typedInput('value', this.msgOutput);
-      }*/
-      // migration code end
-
       $('<button type="button" class="red-ui-button red-ui-button-small"><i class="fa fa-book"></i> help</button>')
         .on('click', () => {
           RED.sidebar.help.show(this.type);
@@ -141,9 +148,6 @@
       this.cmdOutputs = $('#node-input-cmdOutputs').spinner('value');
 
       this.outputs = this.cmdOutputs + 1;
-    },
-    onpaletteadd: function () {
-      // console.log('paletteadd', this);
     },
   });
 </script>
