@@ -71,6 +71,12 @@ module.exports = RED => {
     }
 
     async onInput(msg, send, done) {
+      this._msgid = msg._msgid;
+
+      // this.lastSend = send;
+
+      // this.lastMsg = msg;
+
       await this.handleMsg(msg);
 
       done();
@@ -177,7 +183,7 @@ module.exports = RED => {
 
             this.status({ fill: 'red', shape: 'dot', text: error });
 
-            this.send({ topic: topics[0], payload: { status, error } });
+            this.send({ _msgid: this._msgid, topic: topics[0], payload: { status, error } });
           });
 
           const { pid } = ffmpeg;
@@ -193,7 +199,7 @@ module.exports = RED => {
 
             this.status({ fill: 'green', shape: 'dot', text: message });
 
-            this.send({ topic: topics[0], payload: { status, pid } });
+            this.send({ _msgid: this._msgid, topic: topics[0], payload: { status, pid } });
 
             ffmpeg.once('close', (code, signal) => {
               this.running = false;
@@ -206,7 +212,7 @@ module.exports = RED => {
 
               this.status({ fill: 'red', shape: 'dot', text: message });
 
-              this.send({ topic: topics[0], payload: { status, pid, code, signal, killed } });
+              this.send({ _msgid: this._msgid, topic: topics[0], payload: { status, pid, code, signal, killed } });
 
               this.ffmpeg = undefined;
             });
@@ -236,7 +242,7 @@ module.exports = RED => {
                 const pipe = ffmpeg.stdio[i];
 
                 pipe.on('data', data => {
-                  wires[i] = { topic, payload: data, filename };
+                  wires[i] = { _msgid: this._msgid, topic, payload: data, filename };
 
                   this.send(wires);
                 });
